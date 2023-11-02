@@ -12,7 +12,7 @@ Smooth controls for an enjoyable gaming experience.
 
 Explore the code and assets to understand how the game is structured and designed.
 
-Run the game and start playing. You can use the arrow keys or WASD to control the character.
+Run the game and start playing. You can use the arrow keys and spacebar to control the character.
 
 **How to Play**
 Navigate through various levels filled with challenges and obstacles.

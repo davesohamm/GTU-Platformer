@@ -284,8 +284,20 @@ def main(window):
     block_size = 96
 
     player = Player(100, 100, 50, 50)
-    fire = Fire(225, HEIGHT - block_size - 64, 16, 32)
-    fire.on()
+    fire1 = Fire(225, HEIGHT - block_size - 64, 16, 32)
+    fire2 = Fire(425, HEIGHT - block_size - 64, 16, 32) 
+    fire3 = Fire(725, HEIGHT - block_size - 64, 16, 32) 
+    fire4 = Fire(1325, HEIGHT - block_size - 64, 16, 32) 
+    fire5 = Fire(1625, HEIGHT - block_size * 2 - 64, 16, 32) 
+    fire6 = Fire(1855, HEIGHT - block_size - 64, 16, 32) 
+    fire7 = Fire(2150, HEIGHT - block_size - 64, 16, 32) 
+    fire1.on()
+    fire2.on()
+    fire3.on()
+    fire4.on()
+    fire5.on()
+    fire6.on()
+    fire7.on()
     floor = [Block(i * block_size, HEIGHT - block_size, block_size)
              for i in range((-WIDTH * 2) // block_size, (WIDTH * 5) // block_size)]
     objects = [*floor, Block(0, HEIGHT - block_size * 2, block_size), Block(block_size, HEIGHT - block_size * 3, block_size),
@@ -305,8 +317,8 @@ def main(window):
                Block(block_size * 18, HEIGHT - block_size * 2, block_size), Block(block_size * 18, HEIGHT - block_size * 3, block_size),
                Block(block_size * 18, HEIGHT - block_size * 4, block_size), Block(block_size * 18, HEIGHT - block_size * 5, block_size),
 
-               Block(block_size * 20, HEIGHT - block_size * 2, block_size), Block(block_size * 20, HEIGHT - block_size * 3, block_size), Block(block_size * 21, HEIGHT - block_size * 2, block_size),
-               fire]
+               Block(block_size * 20, HEIGHT - block_size * 3, block_size), Block(block_size * 21, HEIGHT - block_size * 2, block_size),
+            fire1, fire2, fire3, fire4, fire5, fire6, fire7]
 
     offset_x = 0
     scroll_area_width = 200
@@ -325,7 +337,13 @@ def main(window):
                     player.jump()
 
         player.loop(FPS)
-        fire.loop()
+        fire1.loop()
+        fire2.loop()
+        fire3.loop()
+        fire4.loop()
+        fire5.loop()
+        fire6.loop()
+        fire7.loop()
         handle_move(player, objects)
         draw(window, background, bg_image, player, objects, offset_x)
 
