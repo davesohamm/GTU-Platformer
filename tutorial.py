@@ -4,9 +4,10 @@ import math
 import pygame
 from os import listdir
 from os.path import isfile, join
+
 pygame.init()
 
-pygame.display.set_caption("Platformer")
+pygame.display.set_caption("Escape GTU")
 
 WIDTH, HEIGHT = 1000, 800
 FPS = 60
@@ -17,6 +18,38 @@ window = pygame.display.set_mode((WIDTH, HEIGHT))
 
 def flip(sprites):
     return [pygame.transform.flip(sprite, True, False) for sprite in sprites]
+
+
+def start_menu(window):
+    title_font = pygame.font.Font('titlefont.ttf', 80)
+    start_font = pygame.font.Font(None, 36)
+    start_pressed = False
+
+    while not start_pressed:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    start_pressed = True
+
+        # Create a background image for the start menu (You should replace this with your actual background)
+        background_image = pygame.image.load("gtu1.jpg")
+        window.blit(background_image, (0, 0))
+
+        # Draw the game title
+        title_text = title_font.render("GTU Escape", True, (0, 0, 0))
+        title_rect = title_text.get_rect(center=(WIDTH // 2, HEIGHT // 5))
+        window.blit(title_text, title_rect)
+
+        # Draw a "Start" button
+        start_text = start_font.render("Press Space to Start", True, (0, 0, 0))
+        start_rect = start_text.get_rect(center=(WIDTH // 2, HEIGHT // 3.5))
+        window.blit(start_text, start_rect)
+
+        pygame.display.update()
+
 
 
 def load_sprite_sheets(dir1, dir2, width, height, direction=False):
@@ -275,11 +308,16 @@ def handle_move(player, objects):
     for obj in to_check:
         if obj and obj.name == "fire":
             player.make_hit()
-
-
+   
 def main(window):
+    start_menu(window)
     clock = pygame.time.Clock()
     background, bg_image = get_background("gtu1.jpg")
+
+    pygame.mixer.music.load("gtusong.mp3")
+     # Load and play the background music
+    pygame.mixer.music.play(-1)  # -1 makes it play in a loop
+
 
     block_size = 96
 
@@ -353,7 +391,6 @@ def main(window):
 
     pygame.quit()
     quit()
-
 
 if __name__ == "__main__":
     main(window)
