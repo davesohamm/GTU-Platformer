@@ -308,6 +308,31 @@ def handle_move(player, objects):
     for obj in to_check:
         if obj and obj.name == "fire":
             player.make_hit()
+
+def generate_blocks(block_size, num_blocks):
+    # Create a list to store the blocks
+    blocks = []
+     
+    # Loop through the desired number of blocks
+    for _ in range(num_blocks):
+        # Generate random x and y positions for the block
+        x = random.randint(2400 , WIDTH*15)
+        y = random.randint(0 , HEIGHT)
+        temp_block = Block(x, y, block_size)
+
+        # Check for collisions with existing blocks
+        collision = False
+        for existing_block in blocks:
+            # Check if the rectangles of temp_block and existing_block collide
+            if temp_block.rect.colliderect(existing_block.rect):
+                collision = True
+                break
+
+        # If no collision, add the block to the list
+        if not collision:
+            blocks.append(temp_block)
+
+    return blocks
    
 def main(window):
     start_menu(window)
@@ -322,6 +347,10 @@ def main(window):
     block_size = 96
 
     player = Player(100, 100, 50, 50)
+
+    num_blocks = 200  # Adjust this number to change the number of blocks
+    blocks = generate_blocks(block_size, num_blocks)
+
     fire1 = Fire(225, HEIGHT - block_size - 64, 16, 32)
     fire2 = Fire(425, HEIGHT - block_size - 64, 16, 32) 
     fire3 = Fire(725, HEIGHT - block_size - 64, 16, 32) 
@@ -337,8 +366,8 @@ def main(window):
     fire6.on()
     fire7.on()
     floor = [Block(i * block_size, HEIGHT - block_size, block_size)
-             for i in range((-WIDTH * 2) // block_size, (WIDTH * 5) // block_size)]
-    objects = [*floor, Block(0, HEIGHT - block_size * 2, block_size), Block(block_size, HEIGHT - block_size * 3, block_size),
+             for i in range((-WIDTH * 2) // block_size, (WIDTH * 15) // block_size)]
+    objects = [*floor, *blocks, Block(0, HEIGHT - block_size * 2, block_size), Block(block_size, HEIGHT - block_size * 3, block_size),
                Block(block_size * 3, HEIGHT - block_size * 5, block_size), Block(block_size * 3, HEIGHT - block_size * 5, block_size), Block(block_size * 3, HEIGHT - block_size * 4, block_size), 
                Block(block_size * 3, HEIGHT - block_size * 3, block_size),Block(block_size * 3, HEIGHT - block_size * 2, block_size),
                Block(block_size * 4, HEIGHT - block_size * 5, block_size), Block(block_size * 5, HEIGHT - block_size * 3, block_size),
