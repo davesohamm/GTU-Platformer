@@ -21,8 +21,8 @@ def flip(sprites):
 
 
 def start_menu(window):
-    title_font = pygame.font.Font('titlefont.ttf', 80)
-    start_font = pygame.font.Font(None, 36)
+    title_font = pygame.font.Font('kalam.ttf', 80)
+    start_font = pygame.font.Font('kalam.ttf', 36)
     start_pressed = False
 
     while not start_pressed:
@@ -50,7 +50,76 @@ def start_menu(window):
 
         pygame.display.update()
 
+CHARACTERS = ["MaskDude", "NinjaFrog", "PinkMan","VirtualGuy"]
+def select_character(window, CHARACTERS):
+    # Font for character names
+    font = pygame.font.Font('kalam.ttf', 40)
 
+    # Colors
+    WHITE = (255, 255, 255)
+    RED = (255, 0, 0)
+
+    # List of character names and their corresponding images
+    character_names = list(CHARACTERS)
+    character_images = {
+        "VirtualGuy": pygame.image.load(r"Y:/GTU-Platformer/assets/MainCharacters/VirtualGuy/jump.png").convert_alpha(),
+        "MaskDude": pygame.image.load(r"Y:/GTU-Platformer/assets/MainCharacters/MaskDude/jump.png").convert_alpha(),
+        "PinkMan": pygame.image.load(r"Y:/GTU-Platformer/assets/MainCharacters/PinkMan/jump.png").convert_alpha(),
+        "NinjaFrog": pygame.image.load(r"Y:/GTU-Platformer/assets/MainCharacters/NinjaFrog/jump.png").convert_alpha()
+    }
+    selected_index = 0  # Initially select the first character
+    running = True
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                return None
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:  # Player has selected a character
+                    return character_names[selected_index]
+                elif event.key == pygame.K_UP:  # Move selection up
+                    selected_index = (selected_index - 1) % len(character_names)
+                elif event.key == pygame.K_DOWN:  # Move selection down
+                    selected_index = (selected_index + 1) % len(character_names)
+
+        # Drawing the window
+        window.fill((30, 30, 30))  # Fill background with a dark color
+
+        # Drawing title
+        title_font = pygame.font.Font('freesansbold.ttf', 50)
+        title_text = title_font.render("Choose Any Character:", True, WHITE)
+        title_rect = title_text.get_rect(center=(window.get_width() // 2, 50))
+        window.blit(title_text, title_rect)
+
+        # Drawing character names and images with some styling
+        for i, name in enumerate(character_names):
+            # Load character image and resize if needed
+            image = pygame.transform.scale(character_images[name], (100, 100))
+            image_rect = image.get_rect(center=(window.get_width() // 4, 150 + i * 160))
+
+            # Draw character image
+            window.blit(image, image_rect)
+
+            # Draw character name with some horizontal spacing
+            text = font.render(name, True, WHITE if i != selected_index else RED)
+            text_rect = text.get_rect(
+                left=image_rect.right + 20,  # Add spacing between image and text
+                centery=image_rect.centery
+            )
+            window.blit(text, text_rect)
+
+            # Add a highlight effect for the selected character
+            if i == selected_index:
+                pygame.draw.rect(window, WHITE, text_rect, 3)  # White border
+
+        # Add some decorative elements (optional)
+        # Example: Drawing a background image or other visual effects
+
+        pygame.display.flip()
+
+    # If the user closes the window without selecting, return None
+    return None
 
 def load_sprite_sheets(dir1, dir2, width, height, direction=False):
     path = join("assets", dir1, dir2)
@@ -85,14 +154,12 @@ def get_block(size):
     surface.blit(image, (0, 0), rect)
     return pygame.transform.scale2x(surface)
 
-
 class Player(pygame.sprite.Sprite):
     COLOR = (255, 0, 0)
     GRAVITY = 1
-    SPRITES = load_sprite_sheets("MainCharacters", "VirtualGuy", 32, 32, True)
     ANIMATION_DELAY = 3
 
-    def __init__(self, x, y, width, height):
+    def __init__(self, x, y, width, height, character_name):
         super().__init__()
         self.rect = pygame.Rect(x, y, width, height)
         self.x_vel = 0
@@ -104,6 +171,11 @@ class Player(pygame.sprite.Sprite):
         self.jump_count = 0
         self.hit = False
         self.hit_count = 0
+        self.character_name = character_name
+        self.SPRITES = load_sprite_sheets("MainCharacters", self.character_name, 32, 32, True)
+        self.sprite = None
+        # Initialize sprite here
+        self.update_sprite()
 
     def jump(self):
         self.y_vel = -self.GRAVITY * 8
@@ -339,6 +411,10 @@ def main(window):
     clock = pygame.time.Clock()
     background, bg_image = get_background("gtu1.jpg")
 
+    character_name = select_character(window, CHARACTERS)
+    if character_name is None:
+        return
+    
     pygame.mixer.music.load("gtusong.mp3")
      # Load and play the background music
     pygame.mixer.music.play(-1)  # -1 makes it play in a loop
@@ -346,7 +422,7 @@ def main(window):
 
     block_size = 96
 
-    player = Player(100, 100, 50, 50)
+    player = Player(100, 100, 50, 50, character_name)
 
     num_blocks = 200  # Adjust this number to change the number of blocks
     blocks = generate_blocks(block_size, num_blocks)
