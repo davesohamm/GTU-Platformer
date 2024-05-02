@@ -11,7 +11,7 @@ pygame.display.set_caption("Escape GTU")
 
 WIDTH, HEIGHT = 1000, 800
 FPS = 60
-PLAYER_VEL = 5
+PLAYER_VEL = 8
 
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 
@@ -121,6 +121,20 @@ def select_character(window, CHARACTERS):
     # If the user closes the window without selecting, return None
     return None
 
+# Font for displaying the score
+score_font = pygame.font.Font('kalam.ttf', 36)
+
+def display_score(score):
+    # Render the score text
+    score_text = score_font.render(f"Score: {score}", True, (255, 255, 255))
+    # Create a background rectangle for the score text
+    score_rect = score_text.get_rect()
+    score_rect.topright = (WIDTH - 10, 10)
+    score_rect.inflate_ip(10, 5)  # Add padding to the rectangle
+    pygame.draw.rect(window, (0, 0, 0), score_rect)  # Draw background rectangle
+    # Draw the score text on the screen
+    window.blit(score_text, score_rect)
+
 def load_sprite_sheets(dir1, dir2, width, height, direction=False):
     path = join("assets", dir1, dir2)
     images = [f for f in listdir(path) if isfile(join(path, f))]
@@ -178,7 +192,7 @@ class Player(pygame.sprite.Sprite):
         self.update_sprite()
 
     def jump(self):
-        self.y_vel = -self.GRAVITY * 8
+        self.y_vel = -self.GRAVITY * 9
         self.animation_count = 0
         self.jump_count += 1
         if self.jump_count == 1:
@@ -405,7 +419,7 @@ def generate_blocks(block_size, num_blocks):
             blocks.append(temp_block)
 
     return blocks
-   
+                    
 def main(window):
     start_menu(window)
     clock = pygame.time.Clock()
@@ -467,6 +481,9 @@ def main(window):
     scroll_area_width = 200
 
     run = True
+    score = 0
+    prev_score = None
+    is_jumping = False
     while run:
         clock.tick(FPS)
 
@@ -478,6 +495,20 @@ def main(window):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and player.jump_count < 2:
                     player.jump()
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE] and not is_jumping:
+            # Perform jump action here
+            is_jumping = True
+            score += 100  # Increase score on jump
+        elif not keys[pygame.K_SPACE]:
+            is_jumping = False
+
+        # Display the score
+        display_score(score)
+
+        pygame.display.update()
+        clock.tick(60)
 
         player.loop(FPS)
         fire1.loop()
