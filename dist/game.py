@@ -11,7 +11,10 @@ pygame.display.set_caption("Escape GTU")
 
 WIDTH, HEIGHT = 1000, 800
 FPS = 60
-PLAYER_VEL = 8
+PLAYER_VEL = 4
+camera_speed_x = 5
+camera_speed_y = 5
+block_size = 96
 
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 
@@ -44,11 +47,38 @@ def start_menu(window):
         window.blit(title_text, title_rect)
 
         # Draw a "Start" button
-        start_text = start_font.render("Press Space to Start", True, (0, 0, 0))
+        start_text = start_font.render("Press SPACE to Start", True, (0, 0, 0))
         start_rect = start_text.get_rect(center=(WIDTH // 2, HEIGHT // 3.5))
         window.blit(start_text, start_rect)
 
         pygame.display.update()
+
+def game_over_screen(window):
+    # Font for game over message
+    font = pygame.font.Font('kalam.ttf', 60)
+    
+    # Display "GAME OVER" message with black rectangle background
+    game_over_text = font.render("GAME OVER", True, (255, 0, 0))
+    game_over_rect = game_over_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+    pygame.draw.rect(window, (0, 0, 0), game_over_rect.inflate(20, 10))  # Black rectangle background
+    window.blit(game_over_text, game_over_rect)
+
+    # Load game over death picture
+    death_image = pygame.image.load(r"Y:\GTU-Platformer\assets\Other\dead.png").convert_alpha()
+    death_image = pygame.transform.scale(death_image, (200, 200))
+
+    # Display the game over death picture on top of "GAME OVER"
+    death_rect = death_image.get_rect(midbottom=(WIDTH // 2, game_over_rect.top - 20))
+    window.blit(death_image, death_rect)
+    
+    # Display "Press SPACE to restart" message with black rectangle background
+    restart_font = pygame.font.Font('kalam.ttf', 36)
+    restart_text = restart_font.render("Press SPACE to restart", True, (255, 255, 255))
+    restart_rect = restart_text.get_rect(center=(WIDTH // 2, HEIGHT // 1.5))
+    pygame.draw.rect(window, (0, 0, 0), restart_rect.inflate(20, 10))  # Black rectangle background
+    window.blit(restart_text, restart_rect)
+    
+    pygame.display.update()
 
 CHARACTERS = ["MaskDude", "NinjaFrog", "PinkMan","VirtualGuy"]
 def select_character(window, CHARACTERS):
@@ -123,7 +153,7 @@ def select_character(window, CHARACTERS):
 
 def select_terrain(window):
     # Font for terrain names
-    font = pygame.font.Font('freesansbold.ttf', 40)
+    font = pygame.font.Font('kalam.ttf', 40)
 
     # Colors
     WHITE = (255, 255, 255)
@@ -351,6 +381,11 @@ class Player(pygame.sprite.Sprite):
     def draw(self, win, offset_x):
         win.blit(self.sprite, (self.rect.x - offset_x, self.rect.y))
 
+    def check_collision_with_fire(self, fire_objects):
+        for fire in fire_objects:
+            if pygame.sprite.collide_mask(self, fire):
+                return True  # Collision detected with at least one fire
+        return False  # No collision with any fire
 
 class Object(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, name=None):
@@ -401,6 +436,9 @@ class Fire(Object):
 
         if self.animation_count // self.ANIMATION_DELAY > len(sprites):
             self.animation_count = 0
+
+    def update(self):
+        self.loop()  # Update fire animation
 
 
 def get_background(name):
@@ -501,8 +539,24 @@ def generate_blocks(block_size, num_blocks, terrain_rect):
             blocks.append(temp_block)
 
     return blocks
+
+
+def generate_plane(x_offset, y_offset, width, height, terrain_rect):
+
+    blocks = []
+    block_size = 64
+    x = x_offset
+    y = y_offset
+    
+    for row in range(height // block_size):
+        for col in range(width // block_size):
+            block = Block(x + col * block_size, y + row * block_size, block_size, terrain_rect)
+            blocks.append(block)
+    
+    return blocks
+
    
-def main(window):
+def main(window, fire_objects):
     start_menu(window)
     clock = pygame.time.Clock()
     background, bg_image = get_background("gtu1.jpg")
@@ -515,12 +569,11 @@ def main(window):
     if terrain_rect is None:
         return
     
+    objects = []
+    
     pygame.mixer.music.load("gtusong.mp3")
      # Load and play the background music
     pygame.mixer.music.play(-1)  # -1 makes it play in a loop
-
-
-    block_size = 96
 
     player = Player(100, 100, 50, 50, character_name)
 
@@ -543,7 +596,7 @@ def main(window):
     fire7.on()
     floor = [Block(i * block_size, HEIGHT - block_size, block_size, terrain_rect)
          for i in range((-WIDTH * 2) // block_size, (WIDTH * 15) // block_size)]
-
+    
     objects = [*floor, *blocks, Block(0, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size, HEIGHT - block_size * 3, block_size, terrain_rect),
            Block(block_size * 3, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 3, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 3, HEIGHT - block_size * 4, block_size, terrain_rect),
            Block(block_size * 3, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 3, HEIGHT - block_size * 2, block_size, terrain_rect),
@@ -566,15 +619,44 @@ def main(window):
 
 
     offset_x = 0
+    offset_y = 0
     scroll_area_width = 200
+    scroll_area_height = 200
 
     run = True
     score = 0
     prev_score = None
     is_jumping = False
     game_over = False 
+
     while run:
         clock.tick(FPS)
+        # Update and draw player
+        player.loop(FPS)
+        player.draw(window, offset_x)
+        # Update and draw fires
+        for fire in fire_objects:
+          fire.update()
+          fire.draw(window, offset_x)
+        
+                # Check for collision between player and fire objects
+        for fire in fire_objects:
+            if pygame.sprite.collide_mask(player, fire):
+                # If collision detected, set game over state to True
+                game_over = True
+        
+        if game_over:
+                        # Display game over screen
+            game_over_screen(window)
+            pygame.mixer.music.stop()  # Stop the background music
+            pygame.display.update()
+
+            # Wait for player to press space to restart
+            wait_for_restart()
+
+            # Reset game state
+            # Reset player position, score, etc.
+            game_over = False
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -610,13 +692,39 @@ def main(window):
         handle_move(player, objects)
         draw(window, background, bg_image, player, objects, offset_x)
 
+            # Update the camera position based on player's movement
         if ((player.rect.right - offset_x >= WIDTH - scroll_area_width) and player.x_vel > 0) or (
                 (player.rect.left - offset_x <= scroll_area_width) and player.x_vel < 0):
-            offset_x += player.x_vel
-        
+            offset_x += player.x_vel + camera_speed_x
+
+        # Similarly, update the camera position for vertical movement
+        if ((player.rect.bottom - offset_y >= HEIGHT - scroll_area_height) and player.y_vel > 0) or (
+                (player.rect.top - offset_y <= scroll_area_height) and player.y_vel < 0):
+            offset_y += player.y_vel + camera_speed_y
+            
     pygame.quit()
     quit()
 
+def wait_for_restart():
+       waiting = True
+       while waiting:
+         for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    waiting = False
+
 
 if __name__ == "__main__":
-    main(window)
+    # Create a list of fire objects
+    fire1 = Fire(225, HEIGHT - block_size - 64, 16, 32)
+    fire2 = Fire(425, HEIGHT - block_size - 64, 16, 32) 
+    fire3 = Fire(725, HEIGHT - block_size - 64, 16, 32) 
+    fire4 = Fire(1325, HEIGHT - block_size - 64, 16, 32) 
+    fire5 = Fire(1625, HEIGHT - block_size * 2 - 64, 16, 32) 
+    fire6 = Fire(1855, HEIGHT - block_size - 64, 16, 32) 
+    fire7 = Fire(2150, HEIGHT - block_size - 64, 16, 32) 
+    fire_objects = [fire1, fire2, fire3, fire4, fire5, fire6, fire7]
+    main(window, fire_objects)
