@@ -11,7 +11,7 @@ pygame.display.set_caption("Escape GTU")
 
 WIDTH, HEIGHT = 1000, 800
 FPS = 60
-PLAYER_VEL = 5
+PLAYER_VEL = 8
 
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 
@@ -121,6 +121,104 @@ def select_character(window, CHARACTERS):
     # If the user closes the window without selecting, return None
     return None
 
+def select_terrain(window):
+    # Font for terrain names
+    font = pygame.font.Font('freesansbold.ttf', 40)
+
+    # Colors
+    WHITE = (255, 255, 255)
+    RED = (255, 0, 0)
+
+    # List of terrain options
+    terrain_options = [
+        "Hollow Rock", "Grass", "Wooden", "Hollow Wood",
+        "Alien", "Mud", "Ice-Cream", "Steel", "Cheese", "Bricks", "Gold"
+    ]
+
+    selected_index = 0  # Initially select the first terrain
+    running = True
+
+    # Load terrain images
+    terrain_images = {}
+    for terrain in terrain_options:
+        image_path = f"assets/Terrain/{terrain.lower()}.png"
+        original_image = pygame.image.load(image_path).convert_alpha()
+        scaled_image = pygame.transform.scale(original_image, (50, 50))  # Scale down the image
+        terrain_images[terrain] = scaled_image
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                return None
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:  # Player has selected a terrain
+                    return get_terrain_rect(terrain_options[selected_index])
+                elif event.key == pygame.K_UP:  # Move selection up
+                    selected_index = (selected_index - 1) % len(terrain_options)
+                elif event.key == pygame.K_DOWN:  # Move selection down
+                    selected_index = (selected_index + 1) % len(terrain_options)
+
+        # Drawing the window
+        window.fill((30, 30, 30))  # Fill background with a dark color
+
+        # Drawing title
+        title_font = pygame.font.Font('freesansbold.ttf', 50)
+        title_text = title_font.render("Choose Terrain:", True, WHITE)
+        title_rect = title_text.get_rect(center=(window.get_width() // 2, 50))
+        window.blit(title_text, title_rect)
+
+        # Drawing terrain options with images
+        for i, terrain in enumerate(terrain_options):
+            text_color = RED if i == selected_index else WHITE
+            text = font.render(terrain, True, text_color)
+            text_rect = text.get_rect(center=(window.get_width() // 2, 150 + i * 50))
+            window.blit(text, text_rect)
+
+            # Draw terrain image
+            image = terrain_images[terrain]
+            image_rect = image.get_rect(left=100, centery=text_rect.centery)
+            window.blit(image, image_rect)
+
+        pygame.display.flip()
+
+    # If the user closes the window without selecting, return None
+    return None
+
+def get_terrain_rect(terrain_option):
+    # Define terrain rectangles for each terrain option
+    terrain_rectangles = {
+        "Hollow Rock": pygame.Rect(0, 0, 64, 64), 
+        "Grass": pygame.Rect(96, 0, 64, 64),  
+        "Wooden": pygame.Rect(192, 0, 64, 64), 
+        "Hollow Wood": pygame.Rect(0, 64, 64, 64),
+        "Alien": pygame.Rect(0, 128, 64, 64),
+        "Mud": pygame.Rect(96, 64, 64, 64),
+        "Ice-Cream": pygame.Rect(96, 128, 64, 64),
+        "Steel": pygame.Rect(192, 64, 64, 64),
+        "Cheese": pygame.Rect(192, 128, 64, 64),
+        "Bricks": pygame.Rect(272, 64, 64, 64), 
+        "Gold": pygame.Rect(272, 128, 64, 64), 
+        # Add more terrain rectangles for other options
+    }
+
+    # Return the corresponding terrain rectangle for the selected terrain option
+    return terrain_rectangles.get(terrain_option, pygame.Rect(0, 0, WIDTH, HEIGHT))  # Default to full screen if terrain not found
+
+# Font for displaying the score
+score_font = pygame.font.Font('kalam.ttf', 36)
+
+def display_score(score):
+    # Render the score text
+    score_text = score_font.render(f"Score: {score}", True, (255, 255, 255))
+    # Create a background rectangle for the score text
+    score_rect = score_text.get_rect()
+    score_rect.topright = (WIDTH - 10, 10)
+    score_rect.inflate_ip(10, 5)  # Add padding to the rectangle
+    pygame.draw.rect(window, (0, 0, 0), score_rect)  # Draw background rectangle
+    # Draw the score text on the screen
+    window.blit(score_text, score_rect)
+
 def load_sprite_sheets(dir1, dir2, width, height, direction=False):
     path = join("assets", dir1, dir2)
     images = [f for f in listdir(path) if isfile(join(path, f))]
@@ -146,12 +244,11 @@ def load_sprite_sheets(dir1, dir2, width, height, direction=False):
     return all_sprites
 
 
-def get_block(size):
+def get_block(size, terrain_rect):
     path = join("assets", "Terrain", "Terrain.png")
     image = pygame.image.load(path).convert_alpha()
     surface = pygame.Surface((size, size), pygame.SRCALPHA, 32)
-    rect = pygame.Rect(96, 0, size, size)
-    surface.blit(image, (0, 0), rect)
+    surface.blit(image, (0, 0), terrain_rect)
     return pygame.transform.scale2x(surface)
 
 class Player(pygame.sprite.Sprite):
@@ -178,7 +275,7 @@ class Player(pygame.sprite.Sprite):
         self.update_sprite()
 
     def jump(self):
-        self.y_vel = -self.GRAVITY * 8
+        self.y_vel = -self.GRAVITY * 9
         self.animation_count = 0
         self.jump_count += 1
         if self.jump_count == 1:
@@ -269,12 +366,11 @@ class Object(pygame.sprite.Sprite):
 
 
 class Block(Object):
-    def __init__(self, x, y, size):
+    def __init__(self, x, y, size, terrain_rect):
         super().__init__(x, y, size, size)
-        block = get_block(size)
+        block = get_block(size, terrain_rect)
         self.image.blit(block, (0, 0))
         self.mask = pygame.mask.from_surface(self.image)
-
 
 class Fire(Object):
     ANIMATION_DELAY = 3
@@ -381,16 +477,16 @@ def handle_move(player, objects):
         if obj and obj.name == "fire":
             player.make_hit()
 
-def generate_blocks(block_size, num_blocks):
+def generate_blocks(block_size, num_blocks, terrain_rect):
     # Create a list to store the blocks
     blocks = []
      
     # Loop through the desired number of blocks
     for _ in range(num_blocks):
         # Generate random x and y positions for the block
-        x = random.randint(2400 , WIDTH*15)
-        y = random.randint(0 , HEIGHT)
-        temp_block = Block(x, y, block_size)
+        x = random.randint(2400, WIDTH * 15)
+        y = random.randint(0, HEIGHT)
+        temp_block = Block(x, y, block_size, terrain_rect)
 
         # Check for collisions with existing blocks
         collision = False
@@ -415,6 +511,10 @@ def main(window):
     if character_name is None:
         return
     
+    terrain_rect = select_terrain(window)  # Get the selected terrain rect
+    if terrain_rect is None:
+        return
+    
     pygame.mixer.music.load("gtusong.mp3")
      # Load and play the background music
     pygame.mixer.music.play(-1)  # -1 makes it play in a loop
@@ -425,7 +525,7 @@ def main(window):
     player = Player(100, 100, 50, 50, character_name)
 
     num_blocks = 200  # Adjust this number to change the number of blocks
-    blocks = generate_blocks(block_size, num_blocks)
+    blocks = generate_blocks(block_size, num_blocks, terrain_rect) 
 
     fire1 = Fire(225, HEIGHT - block_size - 64, 16, 32)
     fire2 = Fire(425, HEIGHT - block_size - 64, 16, 32) 
@@ -441,32 +541,38 @@ def main(window):
     fire5.on()
     fire6.on()
     fire7.on()
-    floor = [Block(i * block_size, HEIGHT - block_size, block_size)
-             for i in range((-WIDTH * 2) // block_size, (WIDTH * 15) // block_size)]
-    objects = [*floor, *blocks, Block(0, HEIGHT - block_size * 2, block_size), Block(block_size, HEIGHT - block_size * 3, block_size),
-               Block(block_size * 3, HEIGHT - block_size * 5, block_size), Block(block_size * 3, HEIGHT - block_size * 5, block_size), Block(block_size * 3, HEIGHT - block_size * 4, block_size), 
-               Block(block_size * 3, HEIGHT - block_size * 3, block_size),Block(block_size * 3, HEIGHT - block_size * 2, block_size),
-               Block(block_size * 4, HEIGHT - block_size * 5, block_size), Block(block_size * 5, HEIGHT - block_size * 3, block_size),
-               Block(block_size * 5, HEIGHT - block_size * 5, block_size), Block(block_size * 6, HEIGHT - block_size * 5, block_size),
-               Block(block_size * 6, HEIGHT - block_size * 2, block_size), Block(block_size * 6, HEIGHT - block_size * 3, block_size),
+    floor = [Block(i * block_size, HEIGHT - block_size, block_size, terrain_rect)
+         for i in range((-WIDTH * 2) // block_size, (WIDTH * 15) // block_size)]
 
-               Block(block_size * 10, HEIGHT - block_size * 2, block_size), Block(block_size * 10, HEIGHT - block_size * 3, block_size), Block(block_size * 10, HEIGHT - block_size * 4, block_size),
-               Block(block_size * 10, HEIGHT - block_size * 5, block_size),
-               Block(block_size * 9, HEIGHT - block_size * 5, block_size), Block(block_size * 8, HEIGHT - block_size * 5, block_size),
-               Block(block_size * 11, HEIGHT - block_size * 5, block_size), Block(block_size * 12, HEIGHT - block_size * 5, block_size),
+    objects = [*floor, *blocks, Block(0, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size, HEIGHT - block_size * 3, block_size, terrain_rect),
+           Block(block_size * 3, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 3, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 3, HEIGHT - block_size * 4, block_size, terrain_rect),
+           Block(block_size * 3, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 3, HEIGHT - block_size * 2, block_size, terrain_rect),
+           Block(block_size * 4, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 5, HEIGHT - block_size * 3, block_size, terrain_rect),
+           Block(block_size * 5, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 6, HEIGHT - block_size * 5, block_size, terrain_rect),
+           Block(block_size * 6, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 6, HEIGHT - block_size * 3, block_size, terrain_rect),
 
-               Block(block_size * 15, HEIGHT - block_size * 2, block_size), Block(block_size * 15, HEIGHT - block_size * 3, block_size), Block(block_size * 15, HEIGHT - block_size * 4, block_size),
-               Block(block_size * 15, HEIGHT - block_size * 5, block_size), Block(block_size * 16, HEIGHT - block_size * 2, block_size), Block(block_size * 17, HEIGHT - block_size * 2, block_size),
-               Block(block_size * 18, HEIGHT - block_size * 2, block_size), Block(block_size * 18, HEIGHT - block_size * 3, block_size),
-               Block(block_size * 18, HEIGHT - block_size * 4, block_size), Block(block_size * 18, HEIGHT - block_size * 5, block_size),
+           Block(block_size * 10, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 10, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 10, HEIGHT - block_size * 4, block_size, terrain_rect),
+           Block(block_size * 10, HEIGHT - block_size * 5, block_size, terrain_rect),
+           Block(block_size * 9, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 8, HEIGHT - block_size * 5, block_size, terrain_rect),
+           Block(block_size * 11, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 12, HEIGHT - block_size * 5, block_size, terrain_rect),
 
-               Block(block_size * 20, HEIGHT - block_size * 3, block_size), Block(block_size * 21, HEIGHT - block_size * 2, block_size),
-            fire1, fire2, fire3, fire4, fire5, fire6, fire7]
+           Block(block_size * 15, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 15, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 15, HEIGHT - block_size * 4, block_size, terrain_rect),
+           Block(block_size * 15, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 16, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 17, HEIGHT - block_size * 2, block_size, terrain_rect),
+           Block(block_size * 18, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 18, HEIGHT - block_size * 3, block_size, terrain_rect),
+           Block(block_size * 18, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 18, HEIGHT - block_size * 5, block_size, terrain_rect),
+
+           Block(block_size * 20, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 21, HEIGHT - block_size * 2, block_size, terrain_rect),
+           fire1, fire2, fire3, fire4, fire5, fire6, fire7]
+
 
     offset_x = 0
     scroll_area_width = 200
 
     run = True
+    score = 0
+    prev_score = None
+    is_jumping = False
+    game_over = False 
     while run:
         clock.tick(FPS)
 
@@ -478,6 +584,20 @@ def main(window):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and player.jump_count < 2:
                     player.jump()
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE] and not is_jumping:
+            # Perform jump action here
+            is_jumping = True
+            score += 100  # Increase score on jump
+        elif not keys[pygame.K_SPACE]:
+            is_jumping = False
+
+        # Display the score
+        display_score(score)
+
+        pygame.display.update()
+        clock.tick(60)
 
         player.loop(FPS)
         fire1.loop()
@@ -493,9 +613,10 @@ def main(window):
         if ((player.rect.right - offset_x >= WIDTH - scroll_area_width) and player.x_vel > 0) or (
                 (player.rect.left - offset_x <= scroll_area_width) and player.x_vel < 0):
             offset_x += player.x_vel
-
+        
     pygame.quit()
     quit()
+
 
 if __name__ == "__main__":
     main(window)
