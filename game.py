@@ -644,7 +644,8 @@ def main(window, fire_objects):
             if pygame.sprite.collide_mask(player, fire):
                 # If collision detected, set game over state to True
                 game_over = True
-        
+                break
+            
         if game_over:
                         # Display game over screen
             game_over_screen(window)
