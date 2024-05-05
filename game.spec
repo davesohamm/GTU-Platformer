@@ -1,27 +1,27 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-
 a = Analysis(
     ['game.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('kalam.ttf', '.')],  
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[],
     noarchive=False,
-    optimize=0,
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    noconfirm=False,
 )
-pyz = PYZ(a.pure)
 
+pyz = PYZ(a.pure)
 exe = EXE(
     pyz,
     a.scripts,
-    a.binaries,
-    a.datas,
     [],
+    exclude_binaries=True,
     name='game',
     debug=False,
     bootloader_ignore_signals=False,
@@ -31,8 +31,7 @@ exe = EXE(
     runtime_tmpdir=None,
     console=True,
     disable_windowed_traceback=False,
-    argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
-    entitlements_file=None,
+    entitlements_file=None
 )
