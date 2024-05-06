@@ -277,7 +277,6 @@ def load_sprite_sheets(dir1, dir2, width, height, direction=False):
 
     return all_sprites
 
-
 def get_block(size, terrain_rect):
     path = join("assets", "Terrain", "Terrain.png")
     image = pygame.image.load(path).convert_alpha()
@@ -444,6 +443,38 @@ class Fire(Object):
     def update(self):
         self.loop()  # Update fire animation
 
+class Start(Object):
+    ANIMATION_DELAY = 5
+
+    def __init__(self, x, y, width, height):
+        super().__init__(x, y, width, height, "start")
+        self.start = load_sprite_sheets("Items", "Start", width, height)
+        self.image = self.start["off"][0]
+        self.mask = pygame.mask.from_surface(self.image)
+        self.animation_count = 0
+        self.animation_name = "off"
+
+    def on(self):
+        self.animation_name = "on"
+
+    def off(self):
+        self.animation_name = "off"
+
+    def loop(self):
+        sprites = self.start[self.animation_name]
+        sprite_index = (self.animation_count //
+                        self.ANIMATION_DELAY) % len(sprites)
+        self.image = sprites[sprite_index]
+        self.animation_count += 1
+
+        self.rect = self.image.get_rect(topleft=(self.rect.x, self.rect.y))
+        self.mask = pygame.mask.from_surface(self.image)
+
+        if self.animation_count // self.ANIMATION_DELAY > len(sprites):
+            self.animation_count = 0
+
+    def update(self):
+        self.loop()  # Update fire animation
 
 def get_background(name):
     image = pygame.image.load(join("assets", "Background", name))
@@ -468,7 +499,6 @@ def draw(window, background, bg_image, player, objects, offset_x):
     player.draw(window, offset_x)
 
     pygame.display.update()
-
 
 def handle_vertical_collision(player, objects, dy):
     collided_objects = []
@@ -601,6 +631,7 @@ def main(window, fire_objects):
     fire5 = Fire(1625, HEIGHT - block_size * 2 - 64, 16, 32) 
     fire6 = Fire(1855, HEIGHT - block_size - 64, 16, 32) 
     fire7 = Fire(2150, HEIGHT - block_size - 64, 16, 32) 
+    start1 = Start(-20, HEIGHT - block_size * 2.6 - 64, 64, 64)
     fire1.on()
     fire2.on()
     fire3.on()
@@ -608,9 +639,10 @@ def main(window, fire_objects):
     fire5.on()
     fire6.on()
     fire7.on()
+    start1.on()
     floor = [Block(i * block_size, HEIGHT - block_size, block_size, terrain_rect)
          for i in range((-WIDTH * 2) // block_size, (WIDTH * 15) // block_size)]
-    
+
     objects = [*floor, *blocks, Block(0, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size, HEIGHT - block_size * 3, block_size, terrain_rect),
            Block(block_size * 3, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 3, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 3, HEIGHT - block_size * 4, block_size, terrain_rect),
            Block(block_size * 3, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 3, HEIGHT - block_size * 2, block_size, terrain_rect),
@@ -629,7 +661,7 @@ def main(window, fire_objects):
            Block(block_size * 18, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 18, HEIGHT - block_size * 5, block_size, terrain_rect),
 
            Block(block_size * 20, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 21, HEIGHT - block_size * 2, block_size, terrain_rect),
-           fire1, fire2, fire3, fire4, fire5, fire6, fire7]
+           fire1, fire2, fire3, fire4, fire5, fire6, fire7, start1]
 
 
     offset_x = 0
@@ -655,8 +687,12 @@ def main(window, fire_objects):
         for fire in fire_objects:
           fire.update()
           fire.draw(window, offset_x)
-        
-                # Check for collision between player and fire objects
+        # Update and draw start arrow
+        for start1 in objects:
+            start1.update()
+            start1.draw(window, offset_x)
+            
+        # Check for collision between player and fire objects
         for fire in fire_objects:
             if pygame.sprite.collide_mask(player, fire):
                 # If collision detected, set game over state to True
@@ -714,6 +750,7 @@ def main(window, fire_objects):
         fire5.loop()
         fire6.loop()
         fire7.loop()
+        start1.loop()
         handle_move(player, objects)
         draw(window, background, bg_image, player, objects, offset_x)
 
