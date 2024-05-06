@@ -12,6 +12,10 @@ pygame.display.set_caption("Escape GTU")
 WIDTH, HEIGHT = 1000, 800
 FPS = 60
 PLAYER_VEL = 4
+offset_x = 0
+offset_y = 0
+scroll_area_width = 200
+scroll_area_height = 200
 camera_speed_x = 5
 camera_speed_y = 5
 block_size = 96
@@ -555,7 +559,17 @@ def generate_plane(x_offset, y_offset, width, height, terrain_rect):
     
     return blocks
 
-   
+def restart(window, player, offset_x, offset_y, camera_speed_x, camera_speed_y, scroll_area_width, scroll_area_height):
+    # Reset player's position
+    player.rect.x = 100
+    player.rect.y = 400
+    player.x_vel = 0
+    player.y_vel = 0
+    # Reset camera offsets
+    offset_x = 0
+    offset_y = 0
+    return offset_x, offset_y
+
 def main(window, fire_objects):
     start_menu(window)
     clock = pygame.time.Clock()
@@ -622,12 +636,15 @@ def main(window, fire_objects):
     offset_y = 0
     scroll_area_width = 200
     scroll_area_height = 200
+    camera_speed_x = 5
+    camera_speed_y = 5
 
     run = True
     score = 0
     prev_score = None
     is_jumping = False
     game_over = False 
+    restart_condition_met = False
 
     while run:
         clock.tick(FPS)
@@ -654,6 +671,7 @@ def main(window, fire_objects):
 
             # Wait for player to press space to restart
             wait_for_restart()
+            offset_x, offset_y = restart(window, player, offset_x, offset_y, camera_speed_x, camera_speed_y, scroll_area_width, scroll_area_height)
 
             # Reset game state
             # Reset player position, score, etc.
@@ -667,6 +685,12 @@ def main(window, fire_objects):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and player.jump_count < 2:
                     player.jump()
+
+                # Check for game restart
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    offset_x, offset_y = restart(window, player, offset_x, offset_y, camera_speed_x, camera_speed_y, scroll_area_width, scroll_area_height)
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE] and not is_jumping:
@@ -692,7 +716,7 @@ def main(window, fire_objects):
         fire7.loop()
         handle_move(player, objects)
         draw(window, background, bg_image, player, objects, offset_x)
-        
+
         # Update the camera position based on player's movement
         if ((player.rect.right - offset_x >= WIDTH - scroll_area_width) and player.x_vel > 0) or (
                 (player.rect.left - offset_x <= scroll_area_width) and player.x_vel < 0):
@@ -705,6 +729,14 @@ def main(window, fire_objects):
         if ((player.rect.bottom - offset_y >= HEIGHT - scroll_area_height) and player.y_vel > 0) or (
                 (player.rect.top - offset_y <= scroll_area_height) and player.y_vel < 0):
             offset_y += player.y_vel + camera_speed_y
+
+        # Other game logic...
+
+        # Check for game restart
+        if restart_condition_met:
+            offset_x, offset_y = restart(window, player, offset_x, offset_y, camera_speed_x, camera_speed_y, scroll_area_width, scroll_area_height)
+            restart_condition_met = False  # Reset the restart condition after restart
+
 
     pygame.quit()
     quit()
