@@ -692,17 +692,20 @@ def main(window, fire_objects):
         fire7.loop()
         handle_move(player, objects)
         draw(window, background, bg_image, player, objects, offset_x)
-
-            # Update the camera position based on player's movement
+        
+        # Update the camera position based on player's movement
         if ((player.rect.right - offset_x >= WIDTH - scroll_area_width) and player.x_vel > 0) or (
                 (player.rect.left - offset_x <= scroll_area_width) and player.x_vel < 0):
-            offset_x += player.x_vel + camera_speed_x
+            if player.x_vel > 0:
+                offset_x += player.x_vel + camera_speed_x
+            elif player.x_vel < 0 and player.rect.left - offset_x <= scroll_area_width:
+                offset_x += player.x_vel - camera_speed_x
 
         # Similarly, update the camera position for vertical movement
         if ((player.rect.bottom - offset_y >= HEIGHT - scroll_area_height) and player.y_vel > 0) or (
                 (player.rect.top - offset_y <= scroll_area_height) and player.y_vel < 0):
             offset_y += player.y_vel + camera_speed_y
-            
+
     pygame.quit()
     quit()
 
