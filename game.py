@@ -122,9 +122,14 @@ def select_character(window, CHARACTERS):
 
         # Drawing title
         title_font = pygame.font.Font('freesansbold.ttf', 50)
+        nav_font = pygame.font.Font('freesansbold.ttf', 15)
         title_text = title_font.render("Choose Any Character:", True, WHITE)
         title_rect = title_text.get_rect(center=(window.get_width() // 2, 50))
         window.blit(title_text, title_rect)
+        nav_text = nav_font.render("Use UP & DOWN to navigate, and press ENTER to select", True, WHITE)
+        nav_rect = nav_text.get_rect(midtop=(window.get_width() // 2, window.get_height() - 50))
+        window.blit(nav_text, nav_rect)
+
 
         # Drawing character names and images with some styling
         for i, name in enumerate(character_names):
@@ -198,9 +203,13 @@ def select_terrain(window):
 
         # Drawing title
         title_font = pygame.font.Font('freesansbold.ttf', 50)
+        nav_font = pygame.font.Font('freesansbold.ttf', 15)
         title_text = title_font.render("Choose Terrain:", True, WHITE)
         title_rect = title_text.get_rect(center=(window.get_width() // 2, 50))
         window.blit(title_text, title_rect)
+        nav_text = nav_font.render("Use UP & DOWN to navigate, and press ENTER to select", True, WHITE)
+        nav_rect = nav_text.get_rect(midtop=(window.get_width() // 2, window.get_height() - 50))
+        window.blit(nav_text, nav_rect)
 
         # Drawing terrain options with images
         for i, terrain in enumerate(terrain_options):
@@ -474,7 +483,7 @@ class Start(Object):
             self.animation_count = 0
 
     def update(self):
-        self.loop()  # Update fire animation
+        self.loop()  # Update start animation
 
 def get_background(name):
     image = pygame.image.load(join("assets", "Background", name))
