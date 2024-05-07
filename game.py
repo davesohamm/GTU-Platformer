@@ -1,6 +1,7 @@
 import os
 import random
 import math
+import sys
 import pygame
 from os import listdir
 from os.path import isfile, join
@@ -19,8 +20,10 @@ scroll_area_height = 200
 camera_speed_x = 5
 camera_speed_y = 5
 block_size = 96
-
 window = pygame.display.set_mode((WIDTH, HEIGHT))
+# Define custom event for apple collisions
+APPLE_COLLISION_EVENT = pygame.USEREVENT + 1
+TELEPORT_LOCATION = (-1000, -1000)
 
 
 def flip(sprites):
@@ -248,20 +251,6 @@ def get_terrain_rect(terrain_option):
     # Return the corresponding terrain rectangle for the selected terrain option
     return terrain_rectangles.get(terrain_option, pygame.Rect(0, 0, WIDTH, HEIGHT))  # Default to full screen if terrain not found
 
-# Font for displaying the score
-score_font = pygame.font.Font('kalam.ttf', 36)
-
-def display_score(score):
-    # Render the score text
-    score_text = score_font.render(f"Score: {score}", True, (255, 255, 255))
-    # Create a background rectangle for the score text
-    score_rect = score_text.get_rect()
-    score_rect.topright = (WIDTH - 10, 10)
-    score_rect.inflate_ip(10, 5)  # Add padding to the rectangle
-    pygame.draw.rect(window, (0, 0, 0), score_rect)  # Draw background rectangle
-    # Draw the score text on the screen
-    window.blit(score_text, score_rect)
-
 def load_sprite_sheets(dir1, dir2, width, height, direction=False):
     path = join("assets", dir1, dir2)
     images = [f for f in listdir(path) if isfile(join(path, f))]
@@ -485,6 +474,48 @@ class Start(Object):
     def update(self):
         self.loop()  # Update start animation
 
+class Apple(Object):
+    ANIMATION_DELAY = 2  # Add this line to define the animation delay for the apple
+
+    def __init__(self, x, y, width, height):
+        super().__init__(x, y, width, height, "apple")
+        self.apple = load_sprite_sheets("Items", "Fruits", width, height)
+        self.image = self.apple["apple"][0]
+        self.mask = pygame.mask.from_surface(self.image)
+        self.animation_count = 0
+        self.animation_name = "apple"
+        self.touched = False  # Attribute to track whether the apple has been touched
+
+    def set_animation_name(self, animation_name):
+        self.animation_name = animation_name
+
+    def loop(self):
+        sprites = self.apple[self.animation_name]
+        sprite_index = (self.animation_count // self.ANIMATION_DELAY) % len(sprites)
+        self.image = sprites[sprite_index]
+        self.animation_count += 1
+
+        self.rect = self.image.get_rect(topleft=(self.rect.x, self.rect.y))
+        self.mask = pygame.mask.from_surface(self.image)
+
+        if self.animation_count // self.ANIMATION_DELAY > len(sprites):
+            self.animation_count = 0
+
+    def update(self):
+        self.loop()  # Update apple animation
+
+def handle_events(player, objects, score):
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        elif event.type == APPLE_COLLISION_EVENT:
+            apple = event.apple
+            if apple in objects:
+                objects.remove(apple)
+                score += 1
+    return score
+
 def get_background(name):
     image = pygame.image.load(join("assets", "Background", name))
     _, _, width, height = image.get_rect()
@@ -523,7 +554,6 @@ def handle_vertical_collision(player, objects, dy):
             collided_objects.append(obj)
 
     return collided_objects
-
 
 def collide(player, objects, dx):
     player.move(dx, 0)
@@ -565,7 +595,7 @@ def generate_blocks(block_size, num_blocks, terrain_rect):
     # Loop through the desired number of blocks
     for _ in range(num_blocks):
         # Generate random x and y positions for the block
-        x = random.randint(2400, WIDTH * 15)
+        x = random.randint(3400, WIDTH * 15)
         y = random.randint(0, HEIGHT)
         temp_block = Block(x, y, block_size, terrain_rect)
 
@@ -641,6 +671,28 @@ def main(window, fire_objects):
     fire6 = Fire(1855, HEIGHT - block_size - 64, 16, 32) 
     fire7 = Fire(2150, HEIGHT - block_size - 64, 16, 32) 
     start1 = Start(-20, HEIGHT - block_size * 2.6 - 64, 64, 64)
+    apple1 = Apple(300, HEIGHT - block_size * 5 - 64, 32, 32)
+    apple2 = Apple(450, HEIGHT - block_size * 5 - 64, 32, 32)
+    apple3 = Apple(600, HEIGHT - block_size * 5 - 64, 32, 32)
+    apple4 = Apple(750, HEIGHT - block_size * 5 - 64, 32, 32)
+    apple5 = Apple(900, HEIGHT - block_size * 5 - 64, 32, 32)
+    apple6 = Apple(1050, HEIGHT - block_size * 5 - 64, 32, 32)
+    apple7 = Apple(1200, HEIGHT - block_size * 5 - 64, 32, 32)
+    apple8 = Apple(1320, HEIGHT - block_size * 7 - 64, 32, 32)
+    apple9 = Apple(1450, HEIGHT - block_size * 5 - 64, 32, 32)
+    apple10 = Apple(1750, HEIGHT - block_size * 5 - 64, 32, 32)
+    apple11= Apple(1925, HEIGHT - block_size * 3 - 64, 32, 32)
+    apple12= Apple(2030, HEIGHT - block_size * 2.2 - 64, 32, 32)
+    apple13= Apple(2350, HEIGHT - block_size * 2 - 64, 32, 32)
+    apple14= Apple(2600, HEIGHT - block_size * 2 - 64, 32, 32)
+    apple15= Apple(2600, HEIGHT - block_size * 4 - 64, 32, 32)
+    apple16= Apple(2800, HEIGHT - block_size * 2 - 64, 32, 32)
+    apple17= Apple(3000, HEIGHT - block_size * 2 - 64, 32, 32)
+    apple18= Apple(2800, HEIGHT - block_size * 4 - 64, 32, 32)
+    apple19= Apple(2700, HEIGHT - block_size * 6 - 64, 32, 32)
+    apple_objects = [apple1, apple2, apple3, apple4, apple5, apple6, apple7, apple8, apple9, apple10, apple11 ,apple12, apple13, apple14, apple15, apple16, apple17, apple18, apple19]
+
+    font = pygame.font.Font('freesansbold.ttf', 25)
     fire1.on()
     fire2.on()
     fire3.on()
@@ -670,20 +722,24 @@ def main(window, fire_objects):
            Block(block_size * 18, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 18, HEIGHT - block_size * 5, block_size, terrain_rect),
 
            Block(block_size * 20, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 21, HEIGHT - block_size * 2, block_size, terrain_rect),
-           fire1, fire2, fire3, fire4, fire5, fire6, fire7, start1]
 
-
+           Block(block_size * 24, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 25, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 26, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 27, HEIGHT - block_size * 2, block_size, terrain_rect),
+           Block(block_size * 28, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 29, HEIGHT - block_size * 2, block_size, terrain_rect),  Block(block_size * 30, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 31, HEIGHT - block_size * 2, block_size, terrain_rect),
+           Block(block_size * 32, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 25, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 26, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 27, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 29, HEIGHT - block_size * 4, block_size, terrain_rect),
+           Block(block_size * 30, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 31, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 29, HEIGHT - block_size * 8, block_size, terrain_rect),
+            Block(block_size * 26, HEIGHT - block_size * 6, block_size, terrain_rect), Block(block_size * 27, HEIGHT - block_size * 6, block_size, terrain_rect), Block(block_size * 27, HEIGHT - block_size * 8, block_size, terrain_rect),
+           Block(block_size * 28, HEIGHT - block_size * 6, block_size, terrain_rect), Block(block_size * 29, HEIGHT - block_size * 6, block_size, terrain_rect),  Block(block_size * 30, HEIGHT - block_size * 6, block_size, terrain_rect),
+           fire1, fire2, fire3, fire4, fire5, fire6, fire7, start1, *apple_objects ]
+    
     offset_x = 0
     offset_y = 0
     scroll_area_width = 200
     scroll_area_height = 200
     camera_speed_x = 5
     camera_speed_y = 5
-
     run = True
-    score = 0
-    prev_score = None
     is_jumping = False
+    score = 0
     game_over = False 
     restart_condition_met = False
 
@@ -700,14 +756,29 @@ def main(window, fire_objects):
         for start1 in objects:
             start1.update()
             start1.draw(window, offset_x)
-            
+
+        for apple in apple_objects:
+            apple.update()
+            apple.draw(window, offset_x)
+        #Apples getting removed and score increments
+        for apple in apple_objects:
+            if pygame.sprite.collide_rect(player, apple):
+                # Teleport the apple to the chosen location
+                apple.rect.x, apple.rect.y = TELEPORT_LOCATION
+                # Increment the score
+                score += 1
+                       
         # Check for collision between player and fire objects
         for fire in fire_objects:
             if pygame.sprite.collide_mask(player, fire):
                 # If collision detected, set game over state to True
                 game_over = True
                 break
-            
+
+        # Display the scoreboard
+        score_text = font.render("Score: " + str(score), True, (0, 0, 0))
+        window.blit(score_text, (10, 10))
+
         if game_over:
                         # Display game over screen
             game_over_screen(window)
@@ -735,18 +806,8 @@ def main(window, fire_objects):
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
+                    
                     offset_x, offset_y = restart(window, player, offset_x, offset_y, camera_speed_x, camera_speed_y, scroll_area_width, scroll_area_height)
-
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_SPACE] and not is_jumping:
-            # Perform jump action here
-            is_jumping = True
-            score += 100  # Increase score on jump
-        elif not keys[pygame.K_SPACE]:
-            is_jumping = False
-
-        # Display the score
-        display_score(score)
 
         pygame.display.update()
         clock.tick(60)
