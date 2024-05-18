@@ -420,10 +420,10 @@ class Fire(Object):
     def __init__(self, x, y, width, height):
         super().__init__(x, y, width, height, "fire")
         self.fire = load_sprite_sheets("Traps", "Fire", width, height)
-        self.image = self.fire["off"][0]
+        self.image = self.fire["on"][0]
         self.mask = pygame.mask.from_surface(self.image)
         self.animation_count = 0
-        self.animation_name = "off"
+        self.animation_name = "on"
 
     def on(self):
         self.animation_name = "on"
@@ -710,9 +710,9 @@ def main(window, fire_objects):
     fire8.on()
     start1.on()
     floor = [Block(i * block_size, HEIGHT - block_size, block_size, terrain_rect)
-         for i in range((-WIDTH * 2) // block_size, (WIDTH * 15) // block_size)]
+         for i in range((-WIDTH * 2) // block_size, (WIDTH * 30) // block_size)]
 
-    objects = [*floor, *blocks, Block(0, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size, HEIGHT - block_size * 3, block_size, terrain_rect),
+    objects = [*floor, Block(0, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size, HEIGHT - block_size * 3, block_size, terrain_rect),
            Block(block_size * 3, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 3, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 3, HEIGHT - block_size * 4, block_size, terrain_rect),
            Block(block_size * 3, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 3, HEIGHT - block_size * 2, block_size, terrain_rect),
            Block(block_size * 4, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 5, HEIGHT - block_size * 3, block_size, terrain_rect),
@@ -737,6 +737,8 @@ def main(window, fire_objects):
            Block(block_size * 30, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 31, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 29, HEIGHT - block_size * 8, block_size, terrain_rect),
             Block(block_size * 26, HEIGHT - block_size * 6, block_size, terrain_rect), Block(block_size * 27, HEIGHT - block_size * 6, block_size, terrain_rect), Block(block_size * 27, HEIGHT - block_size * 8, block_size, terrain_rect),
            Block(block_size * 28, HEIGHT - block_size * 6, block_size, terrain_rect), Block(block_size * 29, HEIGHT - block_size * 6, block_size, terrain_rect),  Block(block_size * 30, HEIGHT - block_size * 6, block_size, terrain_rect),
+
+
            fire1, fire2, fire3, fire4, fire5, fire6, fire7, fire8, start1, *apple_objects ]
     
     offset_x = 0
