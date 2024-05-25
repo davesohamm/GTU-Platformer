@@ -77,7 +77,7 @@ def game_over_screen(window):
     window.blit(game_over_text, game_over_rect)
 
     # Load game over death picture
-    death_image = pygame.image.load(r"Y:\GTU-Platformer\assets\Other\dead.png").convert_alpha()
+    death_image = pygame.image.load(r"assets\Other\dead.png").convert_alpha()
     death_image = pygame.transform.scale(death_image, (200, 200))
 
     # Display the game over death picture on top of "GAME OVER"
@@ -105,10 +105,10 @@ def select_character(window, CHARACTERS):
     # List of character names and their corresponding images
     character_names = list(CHARACTERS)
     character_images = {
-        "VirtualGuy": pygame.image.load(r"Y:/GTU-Platformer/assets/MainCharacters/VirtualGuy/jump.png").convert_alpha(),
-        "MaskDude": pygame.image.load(r"Y:/GTU-Platformer/assets/MainCharacters/MaskDude/jump.png").convert_alpha(),
-        "PinkMan": pygame.image.load(r"Y:/GTU-Platformer/assets/MainCharacters/PinkMan/jump.png").convert_alpha(),
-        "NinjaFrog": pygame.image.load(r"Y:/GTU-Platformer/assets/MainCharacters/NinjaFrog/jump.png").convert_alpha()
+        "VirtualGuy": pygame.image.load(r"assets/MainCharacters/VirtualGuy/jump.png").convert_alpha(),
+        "MaskDude": pygame.image.load(r"assets/MainCharacters/MaskDude/jump.png").convert_alpha(),
+        "PinkMan": pygame.image.load(r"assets/MainCharacters/PinkMan/jump.png").convert_alpha(),
+        "NinjaFrog": pygame.image.load(r"assets/MainCharacters/NinjaFrog/jump.png").convert_alpha()
     }
     selected_index = 0  # Initially select the first character
     running = True
@@ -448,7 +448,7 @@ class Fire(Object):
         self.loop()  # Update fire animation
 
 class Start(Object):
-    ANIMATION_DELAY = 5
+    ANIMATION_DELAY = 2
 
     def __init__(self, x, y, width, height):
         super().__init__(x, y, width, height, "start")
