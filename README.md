@@ -1,4 +1,5 @@
 _**GTU Escape - 2D Platformer Game**_
+![Screenshot 2024-05-26 112221](https://github.com/davesohamm/GTU-Platformer/assets/127236862/38c60006-07de-40b6-a0cd-26ee687449de)
 
 **Introduction** : 
 Welcome to GTU Escape, a 2D platformer game inspired by the classic Super Mario series. In this game, you play as a student who's trying to escape the iconic Gujarat Technology University (GTU) building. The game is currently in its initial development stage and will feature more levels and exciting features soon.
@@ -13,6 +14,7 @@ Smooth controls for an enjoyable gaming experience.
 Explore the code and assets to understand how the game is structured and designed.
 
 Run the game and start playing. You can use the arrow keys and spacebar to control the character.
+![Screenshot 2024-05-26 112316](https://github.com/davesohamm/GTU-Platformer/assets/127236862/453f7218-6f87-4bfa-8e8d-b4a3312a250a)
 
 **How to Play** : 
 Navigate through various levels filled with challenges and obstacles.
@@ -35,6 +37,7 @@ Enhanced graphics and animations.
 Multiplayer mode.
 Player customization options.
 Stay tuned for updates and be part of this exciting journey!
+![Screenshot 2024-05-26 112420](https://github.com/davesohamm/GTU-Platformer/assets/127236862/2096b370-6fb5-4f63-8e66-6466fb9022c6)
 
 **License** : 
 This project is completely open-source. Feel free to use, modify, and distribute the game.
