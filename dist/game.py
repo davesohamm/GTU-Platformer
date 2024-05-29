@@ -15,10 +15,6 @@ FPS = 60
 PLAYER_VEL = 4
 offset_x = 0
 offset_y = 0
-scroll_area_width = 200
-scroll_area_height = 200
-camera_speed_x = 5
-camera_speed_y = 5
 block_size = 96
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 # Define custom event for apple collisions
@@ -77,7 +73,7 @@ def game_over_screen(window):
     window.blit(game_over_text, game_over_rect)
 
     # Load game over death picture
-    death_image = pygame.image.load(r"Y:\GTU-Platformer\assets\Other\dead.png").convert_alpha()
+    death_image = pygame.image.load(r"assets\Other\dead.png").convert_alpha()
     death_image = pygame.transform.scale(death_image, (200, 200))
 
     # Display the game over death picture on top of "GAME OVER"
@@ -105,10 +101,10 @@ def select_character(window, CHARACTERS):
     # List of character names and their corresponding images
     character_names = list(CHARACTERS)
     character_images = {
-        "VirtualGuy": pygame.image.load(r"Y:/GTU-Platformer/assets/MainCharacters/VirtualGuy/jump.png").convert_alpha(),
-        "MaskDude": pygame.image.load(r"Y:/GTU-Platformer/assets/MainCharacters/MaskDude/jump.png").convert_alpha(),
-        "PinkMan": pygame.image.load(r"Y:/GTU-Platformer/assets/MainCharacters/PinkMan/jump.png").convert_alpha(),
-        "NinjaFrog": pygame.image.load(r"Y:/GTU-Platformer/assets/MainCharacters/NinjaFrog/jump.png").convert_alpha()
+        "VirtualGuy": pygame.image.load(r"assets/MainCharacters/VirtualGuy/jump.png").convert_alpha(),
+        "MaskDude": pygame.image.load(r"assets/MainCharacters/MaskDude/jump.png").convert_alpha(),
+        "PinkMan": pygame.image.load(r"assets/MainCharacters/PinkMan/jump.png").convert_alpha(),
+        "NinjaFrog": pygame.image.load(r"assets/MainCharacters/NinjaFrog/jump.png").convert_alpha()
     }
     selected_index = 0  # Initially select the first character
     running = True
@@ -420,10 +416,10 @@ class Fire(Object):
     def __init__(self, x, y, width, height):
         super().__init__(x, y, width, height, "fire")
         self.fire = load_sprite_sheets("Traps", "Fire", width, height)
-        self.image = self.fire["off"][0]
+        self.image = self.fire["on"][0]
         self.mask = pygame.mask.from_surface(self.image)
         self.animation_count = 0
-        self.animation_name = "off"
+        self.animation_name = "on"
 
     def on(self):
         self.animation_name = "on"
@@ -448,7 +444,7 @@ class Fire(Object):
         self.loop()  # Update fire animation
 
 class Start(Object):
-    ANIMATION_DELAY = 5
+    ANIMATION_DELAY = 2
 
     def __init__(self, x, y, width, height):
         super().__init__(x, y, width, height, "start")
@@ -668,7 +664,7 @@ def main(window, fire_objects):
 
     num_blocks = 200  # Adjust this number to change the number of blocks
     blocks = generate_blocks(block_size, num_blocks, terrain_rect) 
-
+ 
     fire1 = Fire(225, HEIGHT - block_size - 64, 16, 32)
     fire2 = Fire(425, HEIGHT - block_size - 64, 16, 32) 
     fire3 = Fire(725, HEIGHT - block_size - 64, 16, 32) 
@@ -677,6 +673,14 @@ def main(window, fire_objects):
     fire6 = Fire(1855, HEIGHT - block_size - 64, 16, 32) 
     fire7 = Fire(2150, HEIGHT - block_size - 64, 16, 32) 
     fire8 = Fire(2725, HEIGHT - block_size - 64, 16, 32) 
+    fire9 = Fire(3675, HEIGHT - block_size - 64, 16, 32) 
+    fire10 = Fire(4450, HEIGHT - block_size - 64, 16, 32) 
+    fire11 = Fire(4150, HEIGHT - block_size * 6 - 64, 16, 32) 
+    fire12 = Fire(3975, HEIGHT - block_size * 6 - 64, 16, 32) 
+    fire13 = Fire(4825, HEIGHT - block_size - 64, 16, 32) 
+    fire14 = Fire(5500, HEIGHT - block_size - 64, 16, 32) 
+    fire15 = Fire(5500, HEIGHT - block_size * 7 - 64, 16, 32) 
+    fire16 = Fire(6075, HEIGHT - block_size * 4 - 64, 16, 32) 
     start1 = Start(-20, HEIGHT - block_size * 2.6 - 64, 64, 64)
     apple1 = Apple(300, HEIGHT - block_size * 5 - 64, 32, 32)
     apple2 = Apple(450, HEIGHT - block_size * 5 - 64, 32, 32)
@@ -697,7 +701,43 @@ def main(window, fire_objects):
     apple17= Apple(3000, HEIGHT - block_size * 2 - 64, 32, 32)
     apple18= Apple(2800, HEIGHT - block_size * 4 - 64, 32, 32)
     apple19= Apple(2700, HEIGHT - block_size * 6 - 64, 32, 32)
-    apple_objects = [apple1, apple2, apple3, apple4, apple5, apple6, apple7, apple8, apple9, apple10, apple11 ,apple12, apple13, apple14, apple15, apple16, apple17, apple18, apple19]
+    apple20= Apple(3750, HEIGHT - block_size  - 64, 32, 32)
+    apple21= Apple(4050, HEIGHT - block_size  - 64, 32, 32)
+    apple22= Apple(4350, HEIGHT - block_size  - 64, 32, 32)
+    apple23= Apple(3750, HEIGHT - block_size * 4 - 64, 32, 32)
+    apple24= Apple(4050, HEIGHT - block_size * 3 - 64, 32, 32)
+    apple25= Apple(4350, HEIGHT - block_size * 4 - 64, 32, 32)
+    apple26= Apple(3650, HEIGHT - block_size * 4 - 64, 32, 32)
+    apple27= Apple(4450, HEIGHT - block_size * 4 - 64, 32, 32)
+    apple28= Apple(3600, HEIGHT - block_size * 2 - 64, 32, 32)
+    apple29= Apple(3850, HEIGHT - block_size * 6 - 64, 32, 32)
+    apple30= Apple(4250, HEIGHT - block_size * 6 - 64, 32, 32)
+    apple31 = Apple(675, HEIGHT - block_size * 6.5 - 64, 32, 32)
+    apple32 = Apple(5100, HEIGHT - block_size * 5 - 64, 32, 32)
+    apple33 = Apple(4900, HEIGHT - block_size * 4 - 64, 32, 32)
+    apple34 = Apple(5100, HEIGHT - block_size * 3 - 64, 32, 32)
+    apple35 = Apple(5200, HEIGHT - block_size * 3 - 64, 32, 32)
+    apple36 = Apple(5300, HEIGHT - block_size * 5 - 64, 32, 32)
+    apple37 = Apple(5300, HEIGHT - block_size * 2 - 64, 32, 32)
+    apple38 = Apple(5300, HEIGHT - block_size * 3 - 64, 32, 32)
+    apple39 = Apple(5400, HEIGHT - block_size * 5 - 64, 32, 32)
+    apple40 = Apple(5000, HEIGHT - block_size * 5 - 64, 32, 32)
+    apple41 = Apple(5500, HEIGHT - block_size * 2 - 64, 32, 32)
+    apple42 = Apple(5680, HEIGHT - block_size * 2 - 64, 32, 32)
+    apple43 = Apple(5685, HEIGHT - block_size * 3 - 64, 32, 32)
+    apple44 = Apple(5850, HEIGHT - block_size * 5 - 64, 32, 32)
+    apple45 = Apple(5785, HEIGHT - block_size * 4 - 64, 32, 32)
+    apple46 = Apple(5785, HEIGHT - block_size * 3 - 64, 32, 32) 
+    apple47 = Apple(5885, HEIGHT - block_size * 3 - 64, 32, 32)
+    apple48 = Apple(5950, HEIGHT - block_size * 5 - 64, 32, 32)
+    apple49 = Apple(5200, HEIGHT - block_size * 4 - 64, 32, 32)
+    apple50 = Apple(5570, HEIGHT - block_size * 5 - 64, 32, 32)
+    apple51 = Apple(5685, HEIGHT - block_size * 5 - 64, 32, 32)
+    apple52 = Apple(5585, HEIGHT - block_size * 7 - 64, 32, 32)
+    apple53 = Apple(5400, HEIGHT - block_size * 7 - 64, 32, 32)
+
+
+    apple_objects = [apple1, apple2, apple3, apple4, apple5, apple6, apple7, apple8, apple9, apple10, apple11 ,apple12, apple13, apple14, apple15, apple16, apple17, apple18, apple19, apple20, apple21, apple22, apple23, apple24, apple25, apple26, apple27, apple28, apple29, apple30, apple31, apple32, apple33, apple34, apple35, apple36, apple37, apple38, apple39, apple40, apple41, apple42, apple43, apple44, apple45, apple46, apple47, apple48, apple49, apple50 ,apple51, apple52, apple53 ]
 
     font = pygame.font.Font('freesansbold.ttf', 25)
     fire1.on()
@@ -708,11 +748,19 @@ def main(window, fire_objects):
     fire6.on()
     fire7.on()
     fire8.on()
+    fire9.on()
+    fire10.on()
+    fire11.on()
+    fire12.on()
+    fire13.on()
+    fire14.on()
+    fire15.on()
+    fire16.on()
     start1.on()
     floor = [Block(i * block_size, HEIGHT - block_size, block_size, terrain_rect)
-         for i in range((-WIDTH * 2) // block_size, (WIDTH * 15) // block_size)]
+         for i in range((-WIDTH * 2) // block_size, (WIDTH * 30) // block_size)]
 
-    objects = [*floor, *blocks, Block(0, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size, HEIGHT - block_size * 3, block_size, terrain_rect),
+    objects = [*floor, Block(0, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size, HEIGHT - block_size * 3, block_size, terrain_rect),
            Block(block_size * 3, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 3, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 3, HEIGHT - block_size * 4, block_size, terrain_rect),
            Block(block_size * 3, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 3, HEIGHT - block_size * 2, block_size, terrain_rect),
            Block(block_size * 4, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 5, HEIGHT - block_size * 3, block_size, terrain_rect),
@@ -735,9 +783,29 @@ def main(window, fire_objects):
            Block(block_size * 29, HEIGHT - block_size * 2, block_size, terrain_rect),  Block(block_size * 30, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 31, HEIGHT - block_size * 2, block_size, terrain_rect),
            Block(block_size * 32, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 25, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 26, HEIGHT - block_size * 4, block_size, terrain_rect),
            Block(block_size * 30, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 31, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 29, HEIGHT - block_size * 8, block_size, terrain_rect),
-            Block(block_size * 26, HEIGHT - block_size * 6, block_size, terrain_rect), Block(block_size * 27, HEIGHT - block_size * 6, block_size, terrain_rect), Block(block_size * 27, HEIGHT - block_size * 8, block_size, terrain_rect),
+           Block(block_size * 26, HEIGHT - block_size * 6, block_size, terrain_rect), Block(block_size * 27, HEIGHT - block_size * 6, block_size, terrain_rect), Block(block_size * 27, HEIGHT - block_size * 8, block_size, terrain_rect),
            Block(block_size * 28, HEIGHT - block_size * 6, block_size, terrain_rect), Block(block_size * 29, HEIGHT - block_size * 6, block_size, terrain_rect),  Block(block_size * 30, HEIGHT - block_size * 6, block_size, terrain_rect),
-           fire1, fire2, fire3, fire4, fire5, fire6, fire7, fire8, start1, *apple_objects ]
+
+           Block(block_size * 35, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 36, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 37, HEIGHT - block_size * 2, block_size, terrain_rect), 
+           Block(block_size * 37, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 38, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 39, HEIGHT - block_size * 4, block_size, terrain_rect),
+           Block(block_size * 39, HEIGHT - block_size * 6, block_size, terrain_rect), Block(block_size * 40, HEIGHT - block_size * 6, block_size, terrain_rect), Block(block_size * 41, HEIGHT - block_size * 6, block_size, terrain_rect),
+           
+           Block(block_size * 43, HEIGHT - block_size * 6, block_size, terrain_rect), Block(block_size * 44, HEIGHT - block_size * 6, block_size, terrain_rect), Block(block_size * 45, HEIGHT - block_size * 6, block_size, terrain_rect), 
+           Block(block_size * 45, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 46, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 47, HEIGHT - block_size * 4, block_size, terrain_rect),
+           Block(block_size * 47, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 48, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 49, HEIGHT - block_size * 2, block_size, terrain_rect),
+           Block(block_size * 41, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 42, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 43, HEIGHT - block_size * 3, block_size, terrain_rect),
+          
+           Block(block_size * 56, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 58, HEIGHT - block_size * 4, block_size, terrain_rect), 
+           Block(block_size * 56, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 58, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 59, HEIGHT - block_size * 5, block_size, terrain_rect),
+           Block(block_size * 53, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 52, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 52, HEIGHT - block_size * 4, block_size, terrain_rect),
+           Block(block_size * 52, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 53, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 54, HEIGHT - block_size *3, block_size, terrain_rect), 
+           Block(block_size * 61, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 62, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 62, HEIGHT - block_size * 4, block_size, terrain_rect),
+           Block(block_size * 62, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 61, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 60, HEIGHT - block_size * 3, block_size, terrain_rect),
+           Block(block_size * 56, HEIGHT - block_size * 7, block_size, terrain_rect), Block(block_size * 57, HEIGHT - block_size * 7, block_size, terrain_rect), Block(block_size * 58, HEIGHT - block_size * 7, block_size, terrain_rect), 
+           Block(block_size * 51, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 63, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 55, HEIGHT - block_size * 5, block_size, terrain_rect),
+
+
+           fire1, fire2, fire3, fire4, fire5, fire6, fire7, fire8, fire9, fire10, fire11, fire12, fire13, fire14, fire15, fire16, start1, *apple_objects ]
     
     offset_x = 0
     offset_y = 0
@@ -829,6 +897,14 @@ def main(window, fire_objects):
         fire6.loop()
         fire7.loop()
         fire8.loop()
+        fire9.loop()
+        fire10.loop()
+        fire11.loop()
+        fire12.loop()
+        fire13.loop()
+        fire14.loop()
+        fire15.loop()
+        fire16.loop()
         start1.loop()
         handle_move(player, objects)
         draw(window, background, bg_image, player, objects, offset_x)
@@ -879,5 +955,13 @@ if __name__ == "__main__":
     fire6 = Fire(1855, HEIGHT - block_size - 64, 16, 32) 
     fire7 = Fire(2150, HEIGHT - block_size - 64, 16, 32) 
     fire8 = Fire(2725, HEIGHT - block_size - 64, 16, 32) 
-    fire_objects = [fire1, fire2, fire3, fire4, fire5, fire6, fire7, fire8]
+    fire9 = Fire(3675, HEIGHT - block_size - 64, 16, 32) 
+    fire10 = Fire(4450, HEIGHT - block_size - 64, 16, 32) 
+    fire11 = Fire(4150, HEIGHT - block_size * 6 - 64, 16, 32) 
+    fire12 = Fire(3975, HEIGHT - block_size * 6 - 64, 16, 32)  
+    fire13 = Fire(4825, HEIGHT - block_size - 64, 16, 32) 
+    fire14 = Fire(5500, HEIGHT - block_size - 64, 16, 32) 
+    fire15 = Fire(5500, HEIGHT - block_size * 7 - 64, 16, 32) 
+    fire16 = Fire(6075, HEIGHT - block_size * 4 - 64, 16, 32) 
+    fire_objects = [fire1, fire2, fire3, fire4, fire5, fire6, fire7, fire8, fire9, fire10, fire11, fire12, fire13, fire14, fire15, fire16]
     main(window, fire_objects)
