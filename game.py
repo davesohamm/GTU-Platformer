@@ -28,6 +28,14 @@ icon_image = pygame.image.load(icon_path)
 # Set the icon
 pygame.display.set_icon(icon_image)
 
+pygame.mixer.init()
+
+# Load music files
+pygame.mixer.music.load('assets/music/loop1.mp3')
+doublejump_sound = pygame.mixer.Sound('assets/music/doublejump.mp3')
+gameover_sound = pygame.mixer.Sound('assets/music/gameover.mp3')
+score_sound = pygame.mixer.Sound('assets/music/score.mp3')
+
 def flip(sprites):
     return [pygame.transform.flip(sprite, True, False) for sprite in sprites]
 
@@ -89,8 +97,22 @@ def game_over_screen(window):
     
     pygame.display.update()
 
+def load_background(image_path, window):
+    # Load the image
+    background = pygame.image.load(image_path).convert()
+    # Scale to the window size if needed
+    background = pygame.transform.scale(background, (window.get_width(), window.get_height()))
+    return background
+
 CHARACTERS = ["MaskDude", "NinjaFrog", "PinkMan","VirtualGuy"]
 def select_character(window, CHARACTERS):
+    
+    # Load background image
+    char_menu_bg = load_background("assets/Background/charmenubg.jpg", window)
+
+    # Drawing the window
+    window.blit(char_menu_bg, (0, 0))  # Blit the background
+
     # Font for character names
     font = pygame.font.Font('kalam.ttf', 40)
 
@@ -122,12 +144,9 @@ def select_character(window, CHARACTERS):
                 elif event.key == pygame.K_DOWN:  # Move selection down
                     selected_index = (selected_index + 1) % len(character_names)
 
-        # Drawing the window
-        window.fill((30, 30, 30))  # Fill background with a dark color
-
         # Drawing title
         title_font = pygame.font.Font('freesansbold.ttf', 50)
-        nav_font = pygame.font.Font('freesansbold.ttf', 15)
+        nav_font = pygame.font.Font('freesansbold.ttf', 20)
         title_text = title_font.render("Choose Any Character:", True, WHITE)
         title_rect = title_text.get_rect(center=(window.get_width() // 2, 50))
         window.blit(title_text, title_rect)
@@ -166,6 +185,12 @@ def select_character(window, CHARACTERS):
     return None
 
 def select_terrain(window):
+
+    # Load background image
+    terrain_menu_bg = load_background("assets/Background/termenubg.jpg", window)
+        # Drawing the window
+    window.blit(terrain_menu_bg, (0, 0))  # Blit the background
+
     # Font for terrain names
     font = pygame.font.Font('kalam.ttf', 40)
 
@@ -203,12 +228,9 @@ def select_terrain(window):
                 elif event.key == pygame.K_DOWN:  # Move selection down
                     selected_index = (selected_index + 1) % len(terrain_options)
 
-        # Drawing the window
-        window.fill((30, 30, 30))  # Fill background with a dark color
-
         # Drawing title
         title_font = pygame.font.Font('freesansbold.ttf', 50)
-        nav_font = pygame.font.Font('freesansbold.ttf', 15)
+        nav_font = pygame.font.Font('freesansbold.ttf', 20)
         title_text = title_font.render("Choose Terrain:", True, WHITE)
         title_rect = title_text.get_rect(center=(window.get_width() // 2, 50))
         window.blit(title_text, title_rect)
@@ -656,7 +678,7 @@ def main(window, fire_objects):
     
     objects = []
     
-    pygame.mixer.music.load("gtusong.mp3")
+    pygame.mixer.music.load("assets/music/loop1.mp3")
      # Load and play the background music
     pygame.mixer.music.play(-1)  # -1 makes it play in a loop
 
@@ -681,6 +703,12 @@ def main(window, fire_objects):
     fire14 = Fire(5500, HEIGHT - block_size - 64, 16, 32) 
     fire15 = Fire(5500, HEIGHT - block_size * 7 - 64, 16, 32) 
     fire16 = Fire(6075, HEIGHT - block_size * 4 - 64, 16, 32) 
+    fire17 = Fire(6650, HEIGHT - block_size - 64, 16, 32) 
+    fire18 = Fire(6850, HEIGHT - block_size - 64, 16, 32) 
+    fire19 = Fire(7030, HEIGHT - block_size - 64, 16, 32) 
+    fire20 = Fire(7220, HEIGHT - block_size - 64, 16, 32) 
+    fire21 = Fire(7410, HEIGHT - block_size - 64, 16, 32) 
+
     start1 = Start(-20, HEIGHT - block_size * 2.6 - 64, 64, 64)
     apple1 = Apple(300, HEIGHT - block_size * 5 - 64, 32, 32)
     apple2 = Apple(450, HEIGHT - block_size * 5 - 64, 32, 32)
@@ -735,9 +763,13 @@ def main(window, fire_objects):
     apple51 = Apple(5685, HEIGHT - block_size * 5 - 64, 32, 32)
     apple52 = Apple(5585, HEIGHT - block_size * 7 - 64, 32, 32)
     apple53 = Apple(5400, HEIGHT - block_size * 7 - 64, 32, 32)
+    apple54 = Apple(6535, HEIGHT - block_size * 3 - 64, 32, 32)
+    apple55 = Apple(6735, HEIGHT - block_size * 4 - 64, 32, 32)
+    apple56 = Apple(6930, HEIGHT - block_size * 3 - 64, 32, 32)
+    apple57 = Apple(7130, HEIGHT - block_size * 4 - 64, 32, 32)
+    apple58 = Apple(7325, HEIGHT - block_size * 3 - 64, 32, 32)
 
-
-    apple_objects = [apple1, apple2, apple3, apple4, apple5, apple6, apple7, apple8, apple9, apple10, apple11 ,apple12, apple13, apple14, apple15, apple16, apple17, apple18, apple19, apple20, apple21, apple22, apple23, apple24, apple25, apple26, apple27, apple28, apple29, apple30, apple31, apple32, apple33, apple34, apple35, apple36, apple37, apple38, apple39, apple40, apple41, apple42, apple43, apple44, apple45, apple46, apple47, apple48, apple49, apple50 ,apple51, apple52, apple53 ]
+    apple_objects = [apple1, apple2, apple3, apple4, apple5, apple6, apple7, apple8, apple9, apple10, apple11 ,apple12, apple13, apple14, apple15, apple16, apple17, apple18, apple19, apple20, apple21, apple22, apple23, apple24, apple25, apple26, apple27, apple28, apple29, apple30, apple31, apple32, apple33, apple34, apple35, apple36, apple37, apple38, apple39, apple40, apple41, apple42, apple43, apple44, apple45, apple46, apple47, apple48, apple49, apple50 ,apple51, apple52, apple53, apple54, apple55, apple56, apple57, apple58 ]
 
     font = pygame.font.Font('freesansbold.ttf', 25)
     fire1.on()
@@ -756,6 +788,11 @@ def main(window, fire_objects):
     fire14.on()
     fire15.on()
     fire16.on()
+    fire17.on()
+    fire18.on()
+    fire19.on()
+    fire20.on()
+    fire21.on()
     start1.on()
     floor = [Block(i * block_size, HEIGHT - block_size, block_size, terrain_rect)
          for i in range((-WIDTH * 2) // block_size, (WIDTH * 30) // block_size)]
@@ -804,8 +841,18 @@ def main(window, fire_objects):
            Block(block_size * 56, HEIGHT - block_size * 7, block_size, terrain_rect), Block(block_size * 57, HEIGHT - block_size * 7, block_size, terrain_rect), Block(block_size * 58, HEIGHT - block_size * 7, block_size, terrain_rect), 
            Block(block_size * 51, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 63, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 55, HEIGHT - block_size * 5, block_size, terrain_rect),
 
-
-           fire1, fire2, fire3, fire4, fire5, fire6, fire7, fire8, fire9, fire10, fire11, fire12, fire13, fire14, fire15, fire16, start1, *apple_objects ]
+           Block(block_size * 68, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 68, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 68, HEIGHT - block_size *8, block_size, terrain_rect),
+           Block(block_size * 68, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 68, HEIGHT - block_size * 6, block_size, terrain_rect), Block(block_size * 68, HEIGHT - block_size *7, block_size, terrain_rect),
+           Block(block_size * 70, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 70, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 70, HEIGHT - block_size * 4, block_size, terrain_rect),
+           Block(block_size * 70, HEIGHT - block_size * 6, block_size, terrain_rect), Block(block_size * 70, HEIGHT - block_size * 7, block_size, terrain_rect), Block(block_size * 70, HEIGHT - block_size *8, block_size, terrain_rect), 
+           Block(block_size * 72, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 72, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 72, HEIGHT - block_size * 5, block_size, terrain_rect),
+           Block(block_size * 72, HEIGHT - block_size * 6, block_size, terrain_rect), Block(block_size * 72, HEIGHT - block_size * 7, block_size, terrain_rect), Block(block_size * 72, HEIGHT - block_size * 8, block_size, terrain_rect),
+           Block(block_size * 74, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 74, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 74, HEIGHT - block_size * 4, block_size, terrain_rect), 
+           Block(block_size * 74, HEIGHT - block_size * 6, block_size, terrain_rect), Block(block_size * 74, HEIGHT - block_size * 7, block_size, terrain_rect), Block(block_size * 74, HEIGHT - block_size * 8, block_size, terrain_rect),
+           Block(block_size * 76, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 76, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 76, HEIGHT - block_size * 5, block_size, terrain_rect),
+           Block(block_size * 76, HEIGHT - block_size * 6, block_size, terrain_rect), Block(block_size * 76, HEIGHT - block_size * 7, block_size, terrain_rect), Block(block_size * 76, HEIGHT - block_size * 8, block_size, terrain_rect),
+           
+           fire1, fire2, fire3, fire4, fire5, fire6, fire7, fire8, fire9, fire10, fire11, fire12, fire13, fire14, fire15, fire16, fire17, fire18, fire19, fire20, fire21, start1, *apple_objects ]
     
     offset_x = 0
     offset_y = 0
@@ -843,12 +890,14 @@ def main(window, fire_objects):
                 apple.rect.x, apple.rect.y = TELEPORT_LOCATION
                 # Increment the score
                 score += 1
-                       
+                score_sound.play()  # Play score sound
+
         # Check for collision between player and fire objects
         for fire in fire_objects:
             if pygame.sprite.collide_mask(player, fire):
                 # If collision detected, set game over state to True
                 game_over = True
+                gameover_sound.play()  # Play game over sound
                 break
 
         # Display the scoreboard
@@ -856,9 +905,10 @@ def main(window, fire_objects):
         window.blit(score_text, (10, 10))
 
         if game_over:
-                        # Display game over screen
+            # Display game over screen
             game_over_screen(window)
             pygame.mixer.music.stop()  # Stop the background music
+            gameover_sound.play()  # Play game over sound
             pygame.display.update()
 
             # Wait for player to press space to restart
@@ -866,8 +916,9 @@ def main(window, fire_objects):
             offset_x, offset_y = restart(window, player, offset_x, offset_y, camera_speed_x, camera_speed_y, scroll_area_width, scroll_area_height)
 
             # Reset game state
-            # Reset player position, score, etc.
+            pygame.mixer.music.play(-1)  # Restart the background music
             game_over = False
+
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -877,6 +928,8 @@ def main(window, fire_objects):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and player.jump_count < 2:
                     player.jump()
+                    if player.jump_count == 2:  # Assuming double jump is the second jump
+                        doublejump_sound.play()
 
                 # Check for game restart
         for event in pygame.event.get():
@@ -905,6 +958,11 @@ def main(window, fire_objects):
         fire14.loop()
         fire15.loop()
         fire16.loop()
+        fire17.loop()
+        fire18.loop()
+        fire19.loop()
+        fire20.loop()
+        fire21.loop()
         start1.loop()
         handle_move(player, objects)
         draw(window, background, bg_image, player, objects, offset_x)
@@ -963,5 +1021,11 @@ if __name__ == "__main__":
     fire14 = Fire(5500, HEIGHT - block_size - 64, 16, 32) 
     fire15 = Fire(5500, HEIGHT - block_size * 7 - 64, 16, 32) 
     fire16 = Fire(6075, HEIGHT - block_size * 4 - 64, 16, 32) 
-    fire_objects = [fire1, fire2, fire3, fire4, fire5, fire6, fire7, fire8, fire9, fire10, fire11, fire12, fire13, fire14, fire15, fire16]
+    fire17 = Fire(6650, HEIGHT - block_size - 64, 16, 32) 
+    fire18 = Fire(6850, HEIGHT - block_size - 64, 16, 32) 
+    fire19 = Fire(7030, HEIGHT - block_size - 64, 16, 32) 
+    fire20 = Fire(7220, HEIGHT - block_size - 64, 16, 32) 
+    fire21 = Fire(7410, HEIGHT - block_size - 64, 16, 32) 
+
+    fire_objects = [fire1, fire2, fire3, fire4, fire5, fire6, fire7, fire8, fire9, fire10, fire11, fire12, fire13, fire14, fire15, fire16, fire17, fire18, fire19, fire20, fire21]
     main(window, fire_objects)
