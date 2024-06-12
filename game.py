@@ -11,7 +11,7 @@ pygame.init()
 pygame.display.set_caption("Escape GTU")
 
 WIDTH, HEIGHT = 1000, 800
-FPS = 60
+FPS = 120
 PLAYER_VEL = 7
 offset_x = 0
 offset_y = 0
@@ -173,10 +173,6 @@ def select_character(window, CHARACTERS):
             )
             window.blit(text, text_rect)
 
-            # Add a highlight effect for the selected character
-            if i == selected_index:
-                pygame.draw.rect(window, WHITE, text_rect, 3)  # White border
-
         # Add some decorative elements (optional)
         # Example: Drawing a background image or other visual effects
 
@@ -331,7 +327,7 @@ class Player(pygame.sprite.Sprite):
         self.update_sprite()
 
     def jump(self):
-        self.y_vel = -self.GRAVITY * 9
+        self.y_vel = -self.GRAVITY * 8
         self.animation_count = 0
         self.jump_count += 1
         if self.jump_count == 1:
@@ -499,6 +495,40 @@ class Start(Object):
     def update(self):
         self.loop()  # Update start animation
 
+
+class Checkpoint(Object):
+    ANIMATION_DELAY = 4
+
+    def __init__(self, x, y, width, height):
+        super().__init__(x, y, width, height, "checkpoint")
+        self.start = load_sprite_sheets("Items", "Checkpoints", width, height)
+        self.image = self.start["off"][0]
+        self.mask = pygame.mask.from_surface(self.image)
+        self.animation_count = 0
+        self.animation_name = "off"
+
+    def on(self):
+        self.animation_name = "on"
+
+    def off(self):
+        self.animation_name = "off"
+
+    def loop(self):
+        sprites = self.start[self.animation_name]
+        sprite_index = (self.animation_count //
+                        self.ANIMATION_DELAY) % len(sprites)
+        self.image = sprites[sprite_index]
+        self.animation_count += 1
+
+        self.rect = self.image.get_rect(topleft=(self.rect.x, self.rect.y))
+        self.mask = pygame.mask.from_surface(self.image)
+
+        if self.animation_count // self.ANIMATION_DELAY > len(sprites):
+            self.animation_count = 0
+
+    def update(self):
+        self.loop()  # Update start animation
+
 class Apple(Object):
     ANIMATION_DELAY = 2  # Add this line to define the animation delay for the apple
 
@@ -529,6 +559,28 @@ class Apple(Object):
     def update(self):
         self.loop()  # Update apple animation
 
+# Load the elevator image
+elevator_img = pygame.image.load("assets/Background/elevator.png")
+elevator_img = pygame.transform.scale(elevator_img, (683, 514))
+
+class Elevator(pygame.sprite.Sprite):
+    def __init__(self, x, y, image):
+        super().__init__()
+        self.image = image
+        self.x = x
+        self.y = y
+        self.collidable = False  # This makes sure elevator is not checked for collisions
+        self.name = "elevator"
+
+    def draw(self, surface, offset_x):
+        surface.blit(self.image, (self.x - offset_x, self.y))
+        font = pygame.font.Font("escapegtu.ttf", 50)
+        text = font.render("C-Block Lift", True, (0, 0, 0))
+        text_rect = text.get_rect(center=(self.x + self.image.get_width() // 2 - offset_x, self.y - 20))
+        surface.blit(text, text_rect)
+
+    def update(self):
+        pass
 
 class Scoreboard(Object):
     def __init__(self):
@@ -570,13 +622,15 @@ def get_background(name):
 
     return tiles, image
 
-
 def draw(window, background, bg_image, player, objects, offset_x):
     for tile in background:
         window.blit(bg_image, tile)
 
     for obj in objects:
-        obj.draw(window, offset_x)
+        if isinstance(obj, Scoreboard):  # Check if obj is a Scoreboard instance
+            obj.draw(window)
+        else:
+            obj.draw(window, offset_x)
 
     player.draw(window, offset_x)
 
@@ -585,7 +639,9 @@ def draw(window, background, bg_image, player, objects, offset_x):
 def handle_vertical_collision(player, objects, dy):
     collided_objects = []
     for obj in objects:
-        if pygame.sprite.collide_mask(player, obj):
+        if hasattr(obj, 'collidable') and not obj.collidable:
+            continue
+        if not isinstance(obj, Scoreboard) and pygame.sprite.collide_mask(player, obj):
             if dy > 0:
                 player.rect.bottom = obj.rect.top
                 player.landed()
@@ -602,6 +658,8 @@ def collide(player, objects, dx):
     player.update()
     collided_object = None
     for obj in objects:
+        if hasattr(obj, 'collidable') and not obj.collidable:
+            continue
         if pygame.sprite.collide_mask(player, obj):
             collided_object = obj
             break
@@ -610,13 +668,12 @@ def collide(player, objects, dx):
     player.update()
     return collided_object
 
-
 def handle_move(player, objects):
     keys = pygame.key.get_pressed()
 
     player.x_vel = 0
-    collide_left = collide(player, objects, -PLAYER_VEL * 2)
-    collide_right = collide(player, objects, PLAYER_VEL * 2)
+    collide_left = collide(player, [obj for obj in objects if not isinstance(obj, Scoreboard)], -PLAYER_VEL * 2)
+    collide_right = collide(player, [obj for obj in objects if not isinstance(obj, Scoreboard)], PLAYER_VEL * 2)
 
     if keys[pygame.K_LEFT] and not collide_left:
         player.move_left(PLAYER_VEL)
@@ -627,6 +684,8 @@ def handle_move(player, objects):
     to_check = [collide_left, collide_right, *vertical_collide]
 
     for obj in to_check:
+        if isinstance(obj, Scoreboard):
+            continue
         if obj and obj.name == "fire":
             player.make_hit()
 
@@ -717,8 +776,11 @@ def main(window, fire_objects):
     num_blocks = 200  # Adjust this number to change the number of blocks
     blocks = generate_blocks(block_size, num_blocks, terrain_rect)     
     scoreboard = Scoreboard()
+    # Create the elevator object at the specified position
+    elevator = Elevator(14000, HEIGHT - 600, elevator_img)
 
     start1 = Start(-20, HEIGHT - block_size * 2.6 - 64, 64, 64)
+    checkpoint1 = Checkpoint(14120, HEIGHT - 590 - 64, 64, 64)
     apple1 = Apple(300, HEIGHT - block_size * 5 - 64, 32, 32)
     apple2 = Apple(450, HEIGHT - block_size * 5 - 64, 32, 32)
     apple3 = Apple(600, HEIGHT - block_size * 5 - 64, 32, 32)
@@ -822,12 +884,24 @@ def main(window, fire_objects):
     apple101 = Apple(11452, HEIGHT - block_size * 6 - 64, 32, 32)
     apple102 = Apple(11644, HEIGHT - block_size * 5 - 64, 32, 32)
     apple103 = Apple(12028, HEIGHT - block_size * 5 - 64, 32, 32)
+    apple104 = Apple(12422, HEIGHT - block_size * 3 - 64, 32, 32)
+    apple105 = Apple(12518, HEIGHT - block_size * 4 - 64, 32, 32)
+    apple106 = Apple(12614, HEIGHT - block_size * 3 - 64, 32, 32)
+    apple107 = Apple(12806, HEIGHT - block_size * 3 - 64, 32, 32)
+    apple108 = Apple(12902, HEIGHT - block_size * 4 - 64, 32, 32)
+    apple109 = Apple(12998, HEIGHT - block_size * 3 - 64, 32, 32)
+    apple110 = Apple(13190, HEIGHT - block_size * 3 - 64, 32, 32)
+    apple111 = Apple(13286, HEIGHT - block_size * 4 - 64, 32, 32)
+    apple112 = Apple(13382, HEIGHT - block_size * 3 - 64, 32, 32)
+    apple113 = Apple(13574, HEIGHT - block_size * 3 - 64, 32, 32)
+    apple114 = Apple(13670, HEIGHT - block_size * 4 - 64, 32, 32)
+    apple115 = Apple(13766, HEIGHT - block_size * 3 - 64, 32, 32)
 
     apple_objects = [apple1, apple2, apple3, apple4, apple5, apple6, apple7, apple8, apple9, apple10, apple11 ,apple12, apple13, apple14, apple15, apple16, apple17, apple18, apple19, apple20, apple21, apple22, apple23, apple24, apple25, 
                      apple26, apple27, apple28, apple29, apple30, apple31, apple32, apple33, apple34, apple35, apple36, apple37, apple38, apple39, apple40, apple41, apple42, apple43, apple44, apple45, apple46, apple47, apple48, apple49, apple50,
                      apple51, apple52, apple53, apple54, apple55, apple56, apple57, apple58, apple59, apple60, apple61, apple62, apple63, apple64, apple65, apple66, apple67, apple68, apple69, apple70, apple71, apple72, apple73, apple74, apple75, 
                      apple76, apple77, apple78, apple79, apple80, apple81, apple82, apple83, apple84, apple85, apple86, apple87, apple88, apple89, apple90, apple91, apple92, apple93, apple94, apple95, apple96, apple97, apple98, apple99, apple100, 
-                     apple101, apple102, apple103, 
+                     apple101, apple102, apple103, apple104, apple105, apple106, apple107, apple108, apple109, apple110, apple111, apple112, apple113, apple114, apple115
                      ]
 
     font = pygame.font.Font('freesansbold.ttf', 25)
@@ -885,13 +959,31 @@ def main(window, fire_objects):
     fire52.on()
     fire53.on()
     fire54.on()
+    fire55.on()
+    fire56.on()
+    fire57.on()
+    fire58.on()
+    fire59.on()
+    fire60.on()
+    fire61.on()
+    fire62.on()
+    fire63.on()
+    fire64.on()
+    fire65.on()
+    fire66.on()
+    fire67.on()
+    fire68.on()
+    fire69.on()
+    fire70.on()
+    fire71.on()
 
     start1.on()
-
+    checkpoint1.on()
+    
     floor = [Block(i * block_size, HEIGHT - block_size, block_size, terrain_rect)
          for i in range((-WIDTH * 2) // block_size, (WIDTH * 30) // block_size)]
 
-    objects = [*floor, Block(0, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size, HEIGHT - block_size * 3, block_size, terrain_rect),
+    objects = [*floor, elevator, scoreboard, Block(0, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size, HEIGHT - block_size * 3, block_size, terrain_rect),
            Block(block_size * 3, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 3, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 3, HEIGHT - block_size * 4, block_size, terrain_rect),
            Block(block_size * 3, HEIGHT - block_size * 3, block_size, terrain_rect), Block(block_size * 3, HEIGHT - block_size * 2, block_size, terrain_rect),
            Block(block_size * 4, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 5, HEIGHT - block_size * 3, block_size, terrain_rect),
@@ -976,8 +1068,13 @@ def main(window, fire_objects):
            Block(block_size * 123, HEIGHT - block_size * 5, block_size, terrain_rect), Block(block_size * 124, HEIGHT - block_size * 4, block_size, terrain_rect), Block(block_size * 125, HEIGHT - block_size * 3, block_size, terrain_rect),
            Block(block_size * 125, HEIGHT - block_size * 5, block_size, terrain_rect),
 
+           Block(block_size * 128, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 132, HEIGHT - block_size * 2, block_size, terrain_rect),
+           Block(block_size * 136, HEIGHT - block_size * 2, block_size, terrain_rect), Block(block_size * 140, HEIGHT - block_size * 2, block_size, terrain_rect),
+           Block(block_size * 144, HEIGHT - block_size * 2, block_size, terrain_rect), 
+
            fire1, fire2, fire3, fire4, fire5, fire6, fire7, fire8, fire9, fire10, fire11, fire12, fire13, fire14, fire15, fire16, fire17, fire18, fire19, fire20, fire21, fire22, fire23, fire24, fire25, fire26, fire27, fire28, fire29, fire30, 
-           fire31, fire32, fire33, fire34, fire35, fire36, fire37, fire38, fire39, fire40, fire41, fire42, fire43, fire44, fire45, fire46, fire47, fire48, fire49, fire50, fire51, fire52, fire53, fire54, fire55, fire56, fire57, fire58, fire59, start1, *apple_objects ]
+           fire31, fire32, fire33, fire34, fire35, fire36, fire37, fire38, fire39, fire40, fire41, fire42, fire43, fire44, fire45, fire46, fire47, fire48, fire49, fire50, fire51, fire52, fire53, fire54, fire55, fire56, fire57, fire58, fire59,fire60, 
+           fire61, fire62, fire63, fire64, fire65, fire66, fire67, fire68, fire69, fire70, fire71, start1, checkpoint1, *apple_objects ]
 
     while run:
         clock.tick(FPS)
@@ -995,9 +1092,9 @@ def main(window, fire_objects):
           fire.update()
           fire.draw(window, offset_x)
         # Update and draw start arrow
-        for start1 in objects:
-            start1.update()
-            start1.draw(window, offset_x)
+       # for start1 in objects:
+        #    start1.update()
+         #   start1.draw(window, offset_x)
 
         for apple in apple_objects:
             apple.update()
@@ -1019,6 +1116,9 @@ def main(window, fire_objects):
                 gameover_sound.play()  # Play game over sound
                 break
 
+        # Draw the elevator (without any collision logic)
+       # elevator.draw(window, player.rect.x - WIDTH // 2 + player.rect.width // 2)
+        
         if game_over:
             # Display game over screen
             game_over_screen(window)
@@ -1111,8 +1211,26 @@ def main(window, fire_objects):
         fire52.loop()
         fire53.loop()
         fire54.loop()
+        fire55.loop()
+        fire56.loop()
+        fire57.loop()
+        fire58.loop()
+        fire59.loop()
+        fire60.loop()
+        fire61.loop()
+        fire62.loop()
+        fire63.loop()
+        fire64.loop()
+        fire65.loop()
+        fire66.loop()
+        fire67.loop()
+        fire68.loop()
+        fire69.loop()
+        fire70.loop()
+        fire71.loop()
 
         start1.loop()
+        checkpoint1.loop()
 
         handle_move(player, objects)
         draw(window, background, bg_image, player, objects, offset_x)
@@ -1214,11 +1332,25 @@ if __name__ == "__main__":
     fire57 = Fire(10694, HEIGHT - block_size * 5 - 64, 16, 32) 
     fire58 = Fire(11270, HEIGHT - block_size * 4 - 64, 16, 32) 
     fire59 = Fire(11846, HEIGHT - block_size * 5 - 64, 16, 32)
+    fire60 = Fire(12422, HEIGHT - block_size  - 64, 16, 32) 
+    fire61 = Fire(12518, HEIGHT - block_size  - 64, 16, 32)
+    fire62 = Fire(12614, HEIGHT - block_size  - 64, 16, 32)
+    fire63 = Fire(12806, HEIGHT - block_size - 64, 16, 32) 
+    fire64 = Fire(12902, HEIGHT - block_size - 64, 16, 32) 
+    fire65 = Fire(12998, HEIGHT - block_size - 64, 16, 32)
+    fire66 = Fire(13190, HEIGHT - block_size - 64, 16, 32) 
+    fire67 = Fire(13286, HEIGHT - block_size - 64, 16, 32) 
+    fire68 = Fire(13382, HEIGHT - block_size - 64, 16, 32) 
+    fire69 = Fire(13574, HEIGHT - block_size - 64, 16, 32) 
+    fire70 = Fire(13670, HEIGHT - block_size - 64, 16, 32)
+    fire71 = Fire(13766, HEIGHT - block_size - 64, 16, 32) 
 
     fire_objects = [fire1, fire2, fire3, fire4, fire5, fire6, fire7, fire8, fire9, fire10,
                     fire11, fire12, fire13, fire14, fire15, fire16, fire17, fire18, fire19, fire20,
                     fire21, fire22, fire23, fire24, fire25, fire26, fire27, fire28, fire29, fire30,
                     fire31, fire32, fire33, fire34, fire35, fire36, fire37, fire38, fire39, fire40,
                     fire41, fire42, fire43, fire44, fire45, fire46, fire47, fire48, fire49, fire50,
-                    fire51, fire52, fire53, fire54, fire55, fire56, fire57, fire58, fire59]
+                    fire51, fire52, fire53, fire54, fire55, fire56, fire57, fire58, fire59, fire60, 
+                    fire61, fire62, fire63, fire64, fire65, fire66, fire67, fire68, fire69, fire70,
+                    fire71]
     main(window, fire_objects)
