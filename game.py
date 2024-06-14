@@ -20,6 +20,8 @@ window = pygame.display.set_mode((WIDTH, HEIGHT))
 # Define custom event for apple collisions
 APPLE_COLLISION_EVENT = pygame.USEREVENT + 1
 TELEPORT_LOCATION = (-1000, -1000)
+checkpoint2_distance = 14350
+required_score = 100
 
 # Load the icon image
 icon_path = os.path.join('assets', 'icon.ico')  # Path to your icon image
@@ -622,7 +624,7 @@ def get_background(name):
 
     return tiles, image
 
-def draw(window, background, bg_image, player, objects, offset_x):
+def draw(window, background, bg_image, player, objects, offset_x, stop_message, show_stop_message):
     for tile in background:
         window.blit(bg_image, tile)
 
@@ -632,6 +634,10 @@ def draw(window, background, bg_image, player, objects, offset_x):
         else:
             obj.draw(window, offset_x)
 
+    # Draw stop message if player is at checkpoint 2 but doesn't have enough score
+    if show_stop_message:
+        window.blit(stop_message, (WIDTH // 2 - stop_message.get_width() // 2, HEIGHT // 2 - stop_message.get_height() // 2))
+        show_stop_message = False
     player.draw(window, offset_x)
 
     pygame.display.update()
@@ -764,6 +770,9 @@ def main(window, fire_objects):
     score = 0
     game_over = False 
     restart_condition_met = False
+    stopfont = pygame.font.Font("escapegtu.ttf", 36)
+    stop_message = stopfont.render("Score 100 needed to go further!", True, (0, 0, 0))
+    show_stop_message = False
 
     objects = []
     
@@ -781,6 +790,7 @@ def main(window, fire_objects):
 
     start1 = Start(-20, HEIGHT - block_size * 2.6 - 64, 64, 64)
     checkpoint1 = Checkpoint(14120, HEIGHT - 590 - 64, 64, 64)
+    checkpoint2 = Checkpoint(14504, HEIGHT - 160 - 64, 64, 64)
     apple1 = Apple(300, HEIGHT - block_size * 5 - 64, 32, 32)
     apple2 = Apple(450, HEIGHT - block_size * 5 - 64, 32, 32)
     apple3 = Apple(600, HEIGHT - block_size * 5 - 64, 32, 32)
@@ -1074,7 +1084,7 @@ def main(window, fire_objects):
 
            fire1, fire2, fire3, fire4, fire5, fire6, fire7, fire8, fire9, fire10, fire11, fire12, fire13, fire14, fire15, fire16, fire17, fire18, fire19, fire20, fire21, fire22, fire23, fire24, fire25, fire26, fire27, fire28, fire29, fire30, 
            fire31, fire32, fire33, fire34, fire35, fire36, fire37, fire38, fire39, fire40, fire41, fire42, fire43, fire44, fire45, fire46, fire47, fire48, fire49, fire50, fire51, fire52, fire53, fire54, fire55, fire56, fire57, fire58, fire59,fire60, 
-           fire61, fire62, fire63, fire64, fire65, fire66, fire67, fire68, fire69, fire70, fire71, start1, checkpoint1, *apple_objects ]
+           fire61, fire62, fire63, fire64, fire65, fire66, fire67, fire68, fire69, fire70, fire71, start1, checkpoint1, checkpoint2, *apple_objects ]
 
     while run:
         clock.tick(FPS)
@@ -1116,7 +1126,7 @@ def main(window, fire_objects):
                 gameover_sound.play()  # Play game over sound
                 break
 
-        # Draw the elevator (without any collision logic)
+       # Draw the elevator (without any collision logic)
        # elevator.draw(window, player.rect.x - WIDTH // 2 + player.rect.width // 2)
         
         if game_over:
@@ -1231,9 +1241,10 @@ def main(window, fire_objects):
 
         start1.loop()
         checkpoint1.loop()
+        checkpoint2.loop()
 
         handle_move(player, objects)
-        draw(window, background, bg_image, player, objects, offset_x)
+        draw(window, background, bg_image, player, objects, offset_x, stop_message, show_stop_message)
 
         # Update the camera position based on player's movement
         if ((player.rect.right - offset_x >= WIDTH - scroll_area_width) and player.x_vel > 0) or (
@@ -1248,7 +1259,19 @@ def main(window, fire_objects):
                 (player.rect.top - offset_y <= scroll_area_height) and player.y_vel < 0):
             offset_y += player.y_vel + camera_speed_y
 
-        # Other game logic...
+
+        # Check for checkpoint 2
+        if offset_x >= checkpoint2_distance:
+            if score < required_score:
+                # Player cannot pass checkpoint 2 without required score
+                if player.x_vel > 0:
+                    player.rect.x -= player.x_vel  # Move player back
+                elif player.x_vel < 0:
+                    player.rect.x -= player.x_vel  # Move player back
+                player.x_vel = 0  # Stop player's horizontal movement
+                show_stop_message = True
+            else:
+                show_stop_message = False
 
         # Check for game restart
         if restart_condition_met:
@@ -1309,7 +1332,7 @@ if __name__ == "__main__":
     fire34 = Fire(10118, HEIGHT - block_size - 64, 16, 32) 
     fire35 = Fire(10214, HEIGHT - block_size - 64, 16, 32) 
     fire36 = Fire(10310, HEIGHT - block_size - 64, 16, 32) 
-    fire37 = Fire(10406, HEIGHT - block_size  - 64, 16, 32) 
+    fire37 = Fire(10406, HEIGHT - block_size - 64, 16, 32) 
     fire38 = Fire(10502, HEIGHT - block_size - 64, 16, 32) 
     fire39 = Fire(10598, HEIGHT - block_size - 64, 16, 32) 
     fire40 = Fire(10694, HEIGHT - block_size - 64, 16, 32) 
@@ -1332,9 +1355,9 @@ if __name__ == "__main__":
     fire57 = Fire(10694, HEIGHT - block_size * 5 - 64, 16, 32) 
     fire58 = Fire(11270, HEIGHT - block_size * 4 - 64, 16, 32) 
     fire59 = Fire(11846, HEIGHT - block_size * 5 - 64, 16, 32)
-    fire60 = Fire(12422, HEIGHT - block_size  - 64, 16, 32) 
-    fire61 = Fire(12518, HEIGHT - block_size  - 64, 16, 32)
-    fire62 = Fire(12614, HEIGHT - block_size  - 64, 16, 32)
+    fire60 = Fire(12422, HEIGHT - block_size - 64, 16, 32) 
+    fire61 = Fire(12518, HEIGHT - block_size - 64, 16, 32)
+    fire62 = Fire(12614, HEIGHT - block_size - 64, 16, 32)
     fire63 = Fire(12806, HEIGHT - block_size - 64, 16, 32) 
     fire64 = Fire(12902, HEIGHT - block_size - 64, 16, 32) 
     fire65 = Fire(12998, HEIGHT - block_size - 64, 16, 32)
@@ -1345,7 +1368,7 @@ if __name__ == "__main__":
     fire70 = Fire(13670, HEIGHT - block_size - 64, 16, 32)
     fire71 = Fire(13766, HEIGHT - block_size - 64, 16, 32) 
 
-    fire_objects = [fire1, fire2, fire3, fire4, fire5, fire6, fire7, fire8, fire9, fire10,
+    fire_objects = [fire1, fire2, fire3, fire4, fire5, fire6, fire7, fire8, fire9, fire10, 
                     fire11, fire12, fire13, fire14, fire15, fire16, fire17, fire18, fire19, fire20,
                     fire21, fire22, fire23, fire24, fire25, fire26, fire27, fire28, fire29, fire30,
                     fire31, fire32, fire33, fire34, fire35, fire36, fire37, fire38, fire39, fire40,
