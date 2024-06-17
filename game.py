@@ -12,7 +12,7 @@ pygame.display.set_caption("Escape GTU")
 
 WIDTH, HEIGHT = 1000, 800
 FPS = 120
-PLAYER_VEL = 7
+PLAYER_VEL = 5
 offset_x = 0
 offset_y = 0
 block_size = 96
@@ -763,8 +763,8 @@ def main(window, fire_objects):
     offset_y = 0
     scroll_area_width = 400
     scroll_area_height = 400
-    camera_speed_x = 8
-    camera_speed_y = 8
+    camera_speed_x = 6
+    camera_speed_y = 6
     run = True
     is_jumping = False
     score = 0
