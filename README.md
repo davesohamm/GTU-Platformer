@@ -1,6 +1,6 @@
 # 🎮 **GTU Escape - A 2D Platformer Adventure**
 
-![Game Screenshot](https://github.com/davesohamm/GTU-Platformer/assets/127236862/83cc6e09-d88f-4fea-b43f-faafe17276c5)
+[![Game Demo](https://img.youtube.com/vi/O-x0MEVEEHA/0.jpg)](https://youtu.be/O-x0MEVEEHA?si=1MvrkUx1-Dp_bVzT)
 
 ---
 
@@ -20,8 +20,6 @@ The game is currently in its early development phase, with exciting new levels a
 
 Explore the game’s source code and assets to understand how it’s structured and designed!
 
-![Gameplay Screenshot](https://github.com/davesohamm/GTU-Platformer/assets/127236862/199b5c7c-43ab-4f00-848b-b2fd2307f014)
-
 ---
 
 ## 🎮 **How to Play**
@@ -31,8 +29,6 @@ Explore the game’s source code and assets to understand how it’s structured 
 🔹 Collect power-ups and items to enhance your abilities.  
 🔹 Avoid or defeat GTU-themed enemies.  
 🔹 Reach the exit point to complete each level.  
-
-![Game Demo](https://github.com/davesohamm/GTU-Platformer/assets/127236862/199b5c7c-43ab-4f00-848b-b2fd2307f014)
 
 ---
 
@@ -45,8 +41,6 @@ Big things are coming! Here’s what I plan to add in future updates:
 - 👥 **Multiplayer mode**
 
 Stay updated and be part of this adventure!
-
-![Future Plans](https://github.com/davesohamm/GTU-Platformer/assets/127236862/10102770-c70a-4005-9d02-0f6cf9408cc7)
 
 ---
 
