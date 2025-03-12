@@ -1,7 +1,7 @@
 # 🎮 **GTU Escape - A 2D Platformer Adventure**
 
 ## 🎥 **Game Demo**
-[Click to Play](./demo.mp4)
+[Click to Play]((https://youtu.be/O-x0MEVEEHA))
 
 ---
 
